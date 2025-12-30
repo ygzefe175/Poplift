@@ -4,16 +4,23 @@ import React, { useState } from 'react';
 import { Calculator, TrendingUp, DollarSign } from 'lucide-react';
 
 export default function ROICalculator() {
-    const [visitors, setVisitors] = useState(10000);
-    const [cartValue, setCartValue] = useState(500);
-    const [abandonRate, setAbandonRate] = useState(70);
+    // Daha gerçekçi başlangıç değerleri
+    const [visitors, setVisitors] = useState(5000);
+    const [cartValue, setCartValue] = useState(350);
+    const [abandonRate, setAbandonRate] = useState(72);
 
-    // Calculations
+    // Gerçekçi hesaplamalar
     const abandonedVisitors = Math.floor(visitors * (abandonRate / 100));
-    const recoveredWithPoopUp = Math.floor(abandonedVisitors * 0.27); // 27% recovery
-    const monthlyRevenue = recoveredWithPoopUp * cartValue;
+
+    // Recovery rate sepet terk oranına göre dinamik
+    // Yüksek terk oranı = daha fazla kurtarma potansiyeli
+    const baseRecoveryRate = 0.18; // %18 base
+    const bonusRecovery = (abandonRate - 50) / 100 * 0.15; // Yüksek terk = bonus
+    const recoveryRate = Math.min(baseRecoveryRate + bonusRecovery, 0.35); // Max %35
+
+    const recoveredWithPopwise = Math.floor(abandonedVisitors * recoveryRate);
+    const monthlyRevenue = recoveredWithPopwise * cartValue;
     const yearlyRevenue = monthlyRevenue * 12;
-    const roiMultiple = Math.floor(yearlyRevenue / 499);
 
     return (
         <section className="py-24 px-6 bg-gradient-to-br from-brand-orange/5 via-transparent to-transparent">
@@ -24,10 +31,11 @@ export default function ROICalculator() {
                         <span className="text-sm">Ücretsiz ROI Hesaplayıcı</span>
                     </div>
                     <h2 className="text-4xl md:text-5xl font-black text-white mb-4">
-                        Kaç TL Kazanacaksın?
+                        Kaybettiğiniz Geliri Hesaplayın<br />
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange to-emerald-400">(Gerçek Rakamlarla)</span>
                     </h2>
                     <p className="text-slate-400 text-lg">
-                        Sitenin gerçek verilerine göre hesapla
+                        Sitenizin gerçek trafiği üzerinden hesaplayın ve kaç TL kaybettiğinizi görün
                     </p>
                 </div>
 
@@ -41,15 +49,15 @@ export default function ROICalculator() {
                             </label>
                             <input
                                 type="range"
-                                min="1000"
+                                min="500"
                                 max="100000"
-                                step="1000"
+                                step="500"
                                 value={visitors}
                                 onChange={(e) => setVisitors(Number(e.target.value))}
                                 className="w-full h-3 bg-white/10 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-brand-orange [&::-webkit-slider-thumb]:cursor-pointer"
                             />
                             <div className="flex justify-between text-xs text-slate-500 mt-2">
-                                <span>1K</span>
+                                <span>500</span>
                                 <span>100K</span>
                             </div>
                         </div>
@@ -61,16 +69,16 @@ export default function ROICalculator() {
                             </label>
                             <input
                                 type="range"
-                                min="100"
+                                min="50"
                                 max="5000"
-                                step="50"
+                                step="25"
                                 value={cartValue}
                                 onChange={(e) => setCartValue(Number(e.target.value))}
                                 className="w-full h-3 bg-white/10 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-brand-orange [&::-webkit-slider-thumb]:cursor-pointer"
                             />
                             <div className="flex justify-between text-xs text-slate-500 mt-2">
-                                <span>₺100</span>
-                                <span>₺5,000</span>
+                                <span>₺50</span>
+                                <span>₺5.000</span>
                             </div>
                         </div>
 
@@ -81,16 +89,16 @@ export default function ROICalculator() {
                             </label>
                             <input
                                 type="range"
-                                min="50"
-                                max="95"
-                                step="5"
+                                min="1"
+                                max="99"
+                                step="1"
                                 value={abandonRate}
                                 onChange={(e) => setAbandonRate(Number(e.target.value))}
                                 className="w-full h-3 bg-white/10 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-6 [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-red-500 [&::-webkit-slider-thumb]:cursor-pointer"
                             />
                             <div className="flex justify-between text-xs text-slate-500 mt-2">
-                                <span>%50</span>
-                                <span>%95</span>
+                                <span>%1</span>
+                                <span>%99</span>
                             </div>
                         </div>
                     </div>
@@ -105,9 +113,9 @@ export default function ROICalculator() {
                             </div>
 
                             <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-4 sm:p-6 text-center sm:text-left">
-                                <div className="text-emerald-400 text-[10px] sm:text-sm font-bold uppercase tracking-wider mb-1 sm:mb-2">PoopUp ile Kurtarılan</div>
-                                <div className="text-white text-2xl sm:text-3xl font-black mb-1">{recoveredWithPoopUp.toLocaleString()}</div>
-                                <div className="text-slate-400 text-[10px] sm:text-sm">%27 daha fazla satış</div>
+                                <div className="text-emerald-400 text-[10px] sm:text-sm font-bold uppercase tracking-wider mb-1 sm:mb-2">Popwise ile Kurtarılan</div>
+                                <div className="text-white text-2xl sm:text-3xl font-black mb-1">{recoveredWithPopwise.toLocaleString()}</div>
+                                <div className="text-slate-400 text-[10px] sm:text-sm">~%{Math.round(recoveryRate * 100)} daha fazla satış</div>
                             </div>
                         </div>
 
@@ -128,18 +136,11 @@ export default function ROICalculator() {
                                     </div>
                                 </div>
                             </div>
-                        </div>
-
-                        <div className="bg-black/30 rounded-2xl p-6 text-center">
-                            <div className="flex items-center justify-center gap-3 mb-3">
-                                <TrendingUp className="text-brand-orange" size={32} />
-                                <div className="text-white text-3xl font-black">
-                                    {roiMultiple}x ROI
-                                </div>
+                            <div className="mt-6 text-center border-t border-white/10 pt-6">
+                                <p className="text-white text-lg font-bold">
+                                    Popwise ile yılın sonuna kadar <span className="text-emerald-400 text-2xl">₺{yearlyRevenue.toLocaleString()}</span> daha fazla kazanç.
+                                </p>
                             </div>
-                            <p className="text-slate-400 text-sm">
-                                PoopUp'ın tek seferlik maliyeti (₺499) yıllık getirinizin sadece <span className="text-white font-bold">1/{roiMultiple}'si</span>
-                            </p>
                         </div>
 
                         <div className="mt-8 text-center">
@@ -147,10 +148,10 @@ export default function ROICalculator() {
                                 href="/register"
                                 className="inline-flex items-center gap-3 px-12 py-5 bg-brand-orange hover:bg-amber-500 text-black font-black text-xl rounded-2xl transition-all shadow-2xl shadow-brand-orange/30 hover:scale-105"
                             >
-                                Bu Geliri Kaçırma - Hemen Başla
+                                Bu Geliri Hemen Kurtar →
                             </a>
                             <p className="mt-4 text-slate-500 text-sm">
-                                ✓ 3 dakikada kurulum  ✓ Kredi kartı gerekmez
+                                ✓ 3 dakikada kurulum  ✓ Kredi kartı gerekmez  ✓ İlk satış bugün
                             </p>
                         </div>
                     </div>

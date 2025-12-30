@@ -43,7 +43,10 @@ create table popups (
   headline text not null,
   subtext text not null,
   cta_text text not null,
+  cta_url text default null, -- Optional redirect URL when CTA is clicked
   position text default 'center',
+  delay_seconds integer default 5, -- For time_based popups
+  scroll_percent integer default 50, -- For scroll popups
   is_active boolean default true,
   impressions integer default 0,
   clicks integer default 0,

@@ -1,85 +1,170 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// CORS headers for all responses
+const corsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Access-Control-Max-Age': '86400',
+};
+
+// Create Supabase client with proper error handling
+function getSupabaseClient(): SupabaseClient | null {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+    if (!supabaseUrl || !supabaseKey) {
+        console.error('[Track API] Missing Supabase configuration');
+        return null;
+    }
+
+    return createClient(supabaseUrl, supabaseKey, {
+        auth: {
+            autoRefreshToken: false,
+            persistSession: false
+        }
+    });
+}
+
+// Validate UUID format
+function isValidUUID(str: string): boolean {
+    if (!str || typeof str !== 'string') return false;
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    return uuidRegex.test(str);
+}
+
+// Valid event types
+const VALID_EVENT_TYPES = ['impression', 'click', 'close', 'conversion'];
 
 export async function POST(request: NextRequest) {
     try {
-        const body = await request.json();
-        const { popup_id, event_type, url, user_agent } = body;
-
-        if (!popup_id || !event_type) {
+        // Parse request body
+        let body;
+        try {
+            body = await request.json();
+        } catch {
             return NextResponse.json(
-                { error: 'popup_id and event_type are required' },
-                { status: 400 }
+                { success: false, error: 'Invalid JSON body' },
+                { status: 400, headers: corsHeaders }
             );
         }
 
-        // Update impression or click count
-        if (event_type === 'impression') {
-            const { error } = await supabase.rpc('increment_impressions', { popup_id_param: popup_id });
+        const { popup_id, event_type, url, user_agent } = body;
 
-            // Fallback if RPC doesn't exist - direct update
-            if (error && error.code === '42883') {
-                await supabase
-                    .from('popups')
-                    .update({ impressions: supabase.rpc('coalesce', { val: 'impressions', default_val: 0 }) })
-                    .eq('id', popup_id);
+        // Validate popup_id
+        if (!popup_id || !isValidUUID(popup_id)) {
+            return NextResponse.json(
+                { success: false, error: 'Valid popup_id is required' },
+                { status: 400, headers: corsHeaders }
+            );
+        }
+
+        // Validate event_type
+        if (!event_type || !VALID_EVENT_TYPES.includes(event_type)) {
+            return NextResponse.json(
+                { success: false, error: 'Valid event_type is required' },
+                { status: 400, headers: corsHeaders }
+            );
+        }
+
+        // Get Supabase client
+        const supabase = getSupabaseClient();
+        if (!supabase) {
+            // Still return success to not break the client
+            console.error('[Track API] Database connection unavailable');
+            return NextResponse.json(
+                { success: true, warning: 'Tracking skipped due to configuration' },
+                { status: 200, headers: corsHeaders }
+            );
+        }
+
+        // Track the event
+        let tracked = false;
+
+        // Update impression or click count on the popup
+        if (event_type === 'impression') {
+            try {
+                // Try RPC first
+                const { error: rpcError } = await supabase.rpc('increment_impressions', { popup_id_param: popup_id });
+
+                if (rpcError) {
+                    // Fallback: direct update
+                    const { data: popup } = await supabase
+                        .from('popups')
+                        .select('impressions')
+                        .eq('id', popup_id)
+                        .single();
+
+                    if (popup) {
+                        await supabase
+                            .from('popups')
+                            .update({ impressions: (popup.impressions || 0) + 1 })
+                            .eq('id', popup_id);
+                    }
+                }
+                tracked = true;
+            } catch (e) {
+                console.error('[Track API] Error updating impressions:', e);
             }
         } else if (event_type === 'click') {
-            const { error } = await supabase.rpc('increment_clicks', { popup_id_param: popup_id });
+            try {
+                // Try RPC first
+                const { error: rpcError } = await supabase.rpc('increment_clicks', { popup_id_param: popup_id });
 
-            if (error && error.code === '42883') {
-                await supabase
-                    .from('popups')
-                    .update({ clicks: supabase.rpc('coalesce', { val: 'clicks', default_val: 0 }) })
-                    .eq('id', popup_id);
+                if (rpcError) {
+                    // Fallback: direct update
+                    const { data: popup } = await supabase
+                        .from('popups')
+                        .select('clicks')
+                        .eq('id', popup_id)
+                        .single();
+
+                    if (popup) {
+                        await supabase
+                            .from('popups')
+                            .update({ clicks: (popup.clicks || 0) + 1 })
+                            .eq('id', popup_id);
+                    }
+                }
+                tracked = true;
+            } catch (e) {
+                console.error('[Track API] Error updating clicks:', e);
             }
         }
 
-        // Log the event for analytics (optional - we can create this table later)
+        // Log detailed event for analytics (optional - silently fail if table doesn't exist)
         try {
             await supabase.from('popup_events').insert({
                 popup_id,
                 event_type,
-                url: url || null,
-                user_agent: user_agent || null,
+                url: url?.substring(0, 2000) || null, // Limit URL length
+                user_agent: user_agent?.substring(0, 500) || null, // Limit user_agent length
                 created_at: new Date().toISOString()
             });
-        } catch (e) {
-            // Table might not exist yet, ignore
+        } catch {
+            // Table might not exist, continue silently
         }
 
         return NextResponse.json(
-            { success: true },
-            {
-                headers: {
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-                    'Access-Control-Allow-Headers': 'Content-Type',
-                },
-            }
+            { success: true, tracked },
+            { status: 200, headers: corsHeaders }
         );
+
     } catch (error) {
-        console.error('Track API error:', error);
+        console.error('[Track API] Unexpected error:', error);
+        // Always return success to not break the client
         return NextResponse.json(
-            { error: 'Internal server error' },
-            { status: 500 }
+            { success: true, warning: 'Tracking error occurred but was handled' },
+            { status: 200, headers: corsHeaders }
         );
     }
 }
 
+// Handle CORS preflight
 export async function OPTIONS() {
-    return NextResponse.json(
-        {},
-        {
-            headers: {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'POST, OPTIONS',
-                'Access-Control-Allow-Headers': 'Content-Type',
-            },
-        }
-    );
+    return new NextResponse(null, {
+        status: 204,
+        headers: corsHeaders
+    });
 }
