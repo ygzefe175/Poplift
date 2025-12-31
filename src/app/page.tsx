@@ -15,7 +15,6 @@ import BrandLogos from '@/components/BrandLogos';
 import HowItWorks from '@/components/HowItWorks';
 import Features from '@/components/Features';
 import Pricing from '@/components/Pricing';
-import AddOns from '@/components/AddOns';
 import { ArrowRight, Check, Zap, MousePointer2, Sparkles, Building2, ShieldCheck, Mail, Target, Rocket, Clock } from 'lucide-react';
 
 export default function Home() {
@@ -337,11 +336,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 💰 FİYATLANDIRMA */}
+      {/* 💰 FİYATLANDIRMA (Ekstra Güç Katın dahil) */}
       <Pricing />
-
-      {/* 🎁 EK GELİR FİKİRLERİ */}
-      <AddOns />
 
       {/* 🔟 SSS - KULLANICI İTİRAZLARI */}
       <FAQSection />
