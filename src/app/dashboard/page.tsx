@@ -12,10 +12,10 @@ import CampaignList from '@/components/CampaignList';
 import ScriptInstaller from '@/components/ScriptInstaller';
 import { usePopups } from '@/hooks/usePopups';
 import OnboardingChecklist from '@/components/OnboardingChecklist';
-import { Zap, MousePointerClick, ArrowUp, TrendingUp, Users, Target } from 'lucide-react';
+import { Zap, MousePointerClick, ArrowUp, TrendingUp, Users, Target, Mail, RefreshCw } from 'lucide-react';
 
 export default function DashboardPage() {
-    const { user, loading, signOut } = useAuth();
+    const { user, loading, signOut, emailConfirmed } = useAuth();
     const router = useRouter();
     const { profile, loading: profileLoading } = useProfile(user?.id ?? null);
     const [showInstaller, setShowInstaller] = React.useState(true);
@@ -45,6 +45,11 @@ export default function DashboardPage() {
         router.push('/');
     };
 
+    const handleResendEmail = async () => {
+        // Refresh the page to check if email was confirmed
+        window.location.reload();
+    };
+
     if (loading || profileLoading) {
         return (
             <div className="min-h-screen bg-transparent flex items-center justify-center">
@@ -58,6 +63,54 @@ export default function DashboardPage() {
 
     if (!user) {
         return null;
+    }
+
+    // E-posta onaylanmadıysa özel ekran göster
+    if (!emailConfirmed) {
+        return (
+            <main className="min-h-screen bg-transparent">
+                <Navbar />
+                <div className="max-w-2xl mx-auto px-6 py-24 text-center">
+                    <div className="bg-[#1C1C1E] rounded-3xl p-12 border border-white/10 shadow-2xl">
+                        <div className="w-20 h-20 bg-brand-orange/20 rounded-full flex items-center justify-center mx-auto mb-8">
+                            <Mail size={40} className="text-brand-orange" />
+                        </div>
+                        <h1 className="text-3xl font-black text-white mb-4">E-postanı Onayla</h1>
+                        <p className="text-slate-400 mb-8 leading-relaxed">
+                            Panele erişebilmek için <span className="text-white font-bold">{user.email}</span> adresine
+                            gönderdiğimiz e-postadaki bağlantıya tıklaman gerekiyor.
+                        </p>
+
+                        <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 mb-8">
+                            <p className="text-amber-400 text-sm">
+                                💡 E-postayı göremiyorsan <strong>spam/gereksiz</strong> klasörünü kontrol et.
+                            </p>
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                            <button
+                                onClick={handleResendEmail}
+                                className="px-8 py-4 bg-brand-orange hover:bg-brand-orange/90 text-white font-bold rounded-xl transition-all shadow-lg shadow-brand-orange/20 flex items-center justify-center gap-2"
+                            >
+                                <RefreshCw size={20} />
+                                Sayfayı Yenile
+                            </button>
+                            <button
+                                onClick={handleSignOut}
+                                className="px-8 py-4 bg-white/5 hover:bg-white/10 text-white font-bold rounded-xl transition-all border border-white/10"
+                            >
+                                Çıkış Yap
+                            </button>
+                        </div>
+
+                        <p className="text-slate-500 text-xs mt-8">
+                            E-posta onaylandıktan sonra bu sayfa otomatik olarak panele yönlendirilecektir.
+                        </p>
+                    </div>
+                </div>
+                <Footer />
+            </main>
+        );
     }
 
     return (

@@ -7,11 +7,13 @@ import type { User } from '@supabase/supabase-js';
 export function useAuth() {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
+    const [emailConfirmed, setEmailConfirmed] = useState(false);
 
     useEffect(() => {
         // Get initial session
         supabase.auth.getSession().then(({ data: { session } }) => {
             setUser(session?.user ?? null);
+            setEmailConfirmed(!!session?.user?.email_confirmed_at);
             setLoading(false);
         });
 
@@ -20,6 +22,7 @@ export function useAuth() {
             data: { subscription },
         } = supabase.auth.onAuthStateChange((_event, session) => {
             setUser(session?.user ?? null);
+            setEmailConfirmed(!!session?.user?.email_confirmed_at);
         });
 
         return () => subscription.unsubscribe();
@@ -54,6 +57,7 @@ export function useAuth() {
     return {
         user,
         loading,
+        emailConfirmed,
         signUp,
         signIn,
         signOut,
