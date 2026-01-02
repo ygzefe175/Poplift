@@ -31,7 +31,7 @@ export default function TermsPage() {
                     <div className="bg-[#1C1C1E] border border-white/10 rounded-2xl p-8 mb-8">
                         <h2 className="text-2xl font-bold text-white mb-4">1. Hizmet Şartları</h2>
                         <p className="text-slate-400 leading-relaxed">
-                            Popwise Teknoloji A.Ş. ("Popwise") tarafından sunulan hizmetleri kullanarak, bu Kullanım
+                            Poplift Teknoloji A.Ş. ("Poplift") tarafından sunulan hizmetleri kullanarak, bu Kullanım
                             Şartları'nı kabul etmiş olursunuz. Hizmetlerimizi kullanmaya devam etmeniz, bu şartlara
                             bağlı kalmayı kabul ettiğiniz anlamına gelir.
                         </p>
@@ -76,7 +76,7 @@ export default function TermsPage() {
                     <div className="bg-[#1C1C1E] border border-white/10 rounded-2xl p-8 mb-8">
                         <h2 className="text-2xl font-bold text-white mb-4">5. Fikri Mülkiyet</h2>
                         <p className="text-slate-400 leading-relaxed">
-                            Popwise platformu, logoları, tasarımları ve içerikleri Popwise Teknoloji A.Ş.'nin
+                            Poplift platformu, logoları, tasarımları ve içerikleri Poplift Teknoloji A.Ş.'nin
                             fikri mülkiyetidir. Yazılı izin olmadan kopyalanamaz, dağıtılamaz veya değiştirilemez.
                         </p>
                     </div>
@@ -84,7 +84,7 @@ export default function TermsPage() {
                     <div className="bg-[#1C1C1E] border border-white/10 rounded-2xl p-8 mb-8">
                         <h2 className="text-2xl font-bold text-white mb-4">6. Sorumluluk Sınırlaması</h2>
                         <p className="text-slate-400 leading-relaxed">
-                            Popwise, hizmetlerin kullanımından kaynaklanan doğrudan veya dolaylı zararlardan
+                            Poplift, hizmetlerin kullanımından kaynaklanan doğrudan veya dolaylı zararlardan
                             sorumlu tutulamaz. Hizmetler "olduğu gibi" sunulmaktadır ve belirli bir amaca
                             uygunluk garantisi verilmemektedir.
                         </p>
@@ -106,7 +106,7 @@ export default function TermsPage() {
                         </p>
                         <div className="flex items-center gap-3 text-brand-orange">
                             <Mail size={18} />
-                            <a href="mailto:hello@popwise.com" className="hover:underline">hello@popwise.com</a>
+                            <a href="mailto:hello@Poplift.com" className="hover:underline">hello@Poplift.com</a>
                         </div>
                     </div>
                 </div>

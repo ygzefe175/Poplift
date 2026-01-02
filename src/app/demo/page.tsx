@@ -3,7 +3,8 @@
 import React, { useState } from 'react';
 import Navbar from '@/components/Navbar';
 import SmartPopup from '@/components/SmartPopup';
-import { MousePointer2, Clock, MoveDown, RefreshCw, ShoppingCart, ShieldCheck, Tag, Info, AlertCircle, Heart, Zap, Sparkles, Mail } from 'lucide-react';
+import SpinWheel from '@/components/SpinWheel';
+import { MousePointer2, Clock, MoveDown, RefreshCw, ShoppingCart, ShieldCheck, Tag, Info, AlertCircle, Heart, Zap, Sparkles, Mail, Gift } from 'lucide-react';
 import { useVisitorTracker } from '@/hooks/useVisitorTracker';
 import clsx from 'clsx';
 import { VisitorTag } from '@/lib/types';
@@ -22,6 +23,7 @@ export default function DemoPage() {
     const [activePosition, setActivePosition] = useState<'center' | 'top_right' | 'top_left' | 'bottom_right' | 'bottom_left' | 'top_center' | 'bottom_center'>('center');
     const [aiLogs, setAiLogs] = useState<AiLogEntry[]>([]);
     const [isSimulating, setIsSimulating] = useState(false);
+    const [showSpinWheel, setShowSpinWheel] = useState(false);
 
     const addLog = (text: string, type: AiLogEntry['type']) => {
         setAiLogs(prev => [
@@ -102,6 +104,21 @@ export default function DemoPage() {
                                 )}
                             </div>
                         ))}
+
+                        {/* Çarkıfelek Butonu */}
+                        <div
+                            className="p-4 rounded-2xl bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/30 hover:border-yellow-500/50 transition-all cursor-pointer group relative overflow-hidden"
+                            onClick={() => setShowSpinWheel(true)}
+                        >
+                            <div className="flex items-center gap-4 mb-2 relative z-10">
+                                <div className="p-2 rounded-lg bg-yellow-500/20 text-yellow-400">
+                                    <Gift size={20} />
+                                </div>
+                                <h3 className="font-bold text-white">🎡 Şans Çarkı</h3>
+                            </div>
+                            <p className="text-sm text-slate-400 relative z-10">Gamification demo: E-posta topla, kupon ver</p>
+                            <div className="absolute top-2 right-2 px-2 py-1 bg-yellow-500 text-black text-[8px] font-black rounded uppercase">YENİ</div>
+                        </div>
                     </div>
 
                     <div className="pt-6 border-t border-white/5">
@@ -147,7 +164,7 @@ export default function DemoPage() {
                         <div className="bg-[#1C1C1E] h-14 border-b border-white/5 px-6 flex items-center justify-between">
                             <div className="flex items-center gap-2">
                                 <div className="w-8 h-8 rounded-lg bg-brand-orange flex items-center justify-center font-black text-xs text-black">P</div>
-                                <span className="text-sm font-bold text-white">Popwise Store</span>
+                                <span className="text-sm font-bold text-white">Poplift Store</span>
                             </div>
                             <div className="flex items-center gap-4">
                                 <div className="text-slate-500"><Info size={16} /></div>
@@ -256,6 +273,9 @@ export default function DemoPage() {
             <SmartPopup
                 forcedConfig={activeTrigger ? { isVisible: true, tag: activeTag, position: activePosition } : { isVisible: false, tag: 'standard' }}
             />
+
+            {/* Spin Wheel Modal */}
+            <SpinWheel isOpen={showSpinWheel} onClose={() => setShowSpinWheel(false)} />
         </main>
     );
 }

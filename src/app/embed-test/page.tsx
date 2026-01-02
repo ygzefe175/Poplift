@@ -21,7 +21,7 @@ export default function EmbedTestPage() {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Sitesi - Popwise Demo</title>
+    <title>Test Sitesi - Poplift Demo</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
@@ -60,13 +60,13 @@ export default function EmbedTestPage() {
         }
     </style>
     
-    <!-- Popwise Conversion System -->
+    <!-- Poplift Conversion System -->
     <script src="${baseUrl}/api/pixel?id=${user?.id || 'demo'}" async></script>
 </head>
 <body>
     <div class="container">
         <h1>🎉 Örnek E-Ticaret Sitesi</h1>
-        <p>Bu sayfa, Popwise embed kodunun nasıl çalıştığını test etmek için oluşturulmuş bir demo sitedir.</p>
+        <p>Bu sayfa, Poplift embed kodunun nasıl çalıştığını test etmek için oluşturulmuş bir demo sitedir.</p>
         
         <div class="card">
             <h2>🛍️ Ürünlerimiz</h2>
@@ -94,7 +94,7 @@ export default function EmbedTestPage() {
         </div>
         
         <div class="notice">
-            ⚡ Bu sayfada Popwise embed kodu aktif. Pop-up'larınız burada görünecek!
+            ⚡ Bu sayfada Poplift embed kodu aktif. Pop-up'larınız burada görünecek!
         </div>
     </div>
 </body>

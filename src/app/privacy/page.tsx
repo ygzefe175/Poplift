@@ -31,7 +31,7 @@ export default function PrivacyPage() {
                     <div className="bg-[#1C1C1E] border border-white/10 rounded-2xl p-8 mb-8">
                         <h2 className="text-2xl font-bold text-white mb-4">1. Giriş</h2>
                         <p className="text-slate-400 leading-relaxed">
-                            Popwise Teknoloji A.Ş. ("Popwise", "biz" veya "şirket") olarak, kişisel verilerinizin gizliliğini
+                            Poplift Teknoloji A.Ş. ("Poplift", "biz" veya "şirket") olarak, kişisel verilerinizin gizliliğini
                             korumayı taahhüt ediyoruz. Bu Gizlilik Politikası, web sitemiz ve hizmetlerimiz aracılığıyla
                             topladığımız kişisel bilgilerin nasıl toplandığını, kullanıldığını, paylaşıldığını ve korunduğunu açıklamaktadır.
                         </p>
@@ -104,7 +104,7 @@ export default function PrivacyPage() {
                         </p>
                         <div className="flex items-center gap-3 text-brand-orange">
                             <Mail size={18} />
-                            <a href="mailto:hello@popwise.com" className="hover:underline">hello@popwise.com</a>
+                            <a href="mailto:hello@Poplift.com" className="hover:underline">hello@Poplift.com</a>
                         </div>
                     </div>
                 </div>

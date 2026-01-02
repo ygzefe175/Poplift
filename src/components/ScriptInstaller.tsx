@@ -20,7 +20,7 @@ export default function ScriptInstaller({ userId, onCopy }: ScriptInstallerProps
     }, []);
 
     // Production-ready embed code
-    const scriptCode = `<!-- Popwise - Conversion Optimization -->
+    const scriptCode = `<!-- Poplift - Conversion Optimization -->
 <script src="${baseUrl}/api/pixel?id=${userId || 'YOUR_USER_ID'}" async></script>`;
 
     const handleCopy = () => {

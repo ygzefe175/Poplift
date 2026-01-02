@@ -12,11 +12,13 @@ export default function Pricing() {
             features: [
                 "1.000 görüntüleme/ay",
                 "2 aktif kampanya",
-                "Temel şablonlar",
+                "Standart pop-up şablonları",
                 "Email destek",
                 "Temel analitikler",
-                "Popwise branding"
+                "Poplift branding"
             ],
+            // Güncelleme: Gamification ve Oto E-mail excluded
+            excluded: ["🎡 Gamification (Çarkıfelek)", "📧 Otomatik E-Posta", "Gelişmiş ROI Analizi"],
             cta: "Ücretsiz Başla",
             popular: false,
             link: "/register?plan=free"
@@ -30,14 +32,16 @@ export default function Pricing() {
                 "25.000 görüntüleme/ay",
                 "Sınırsız kampanya",
                 "Tüm şablonlar + özel tasarım",
+                // Güncelleme: Gamification ve Auto Email eklendi
+                "🎡 Gamification (Çarkıfelek)",
+                "📧 Otomatik E-Posta (Auto-Responder)",
                 "Öncelikli destek",
                 "Gelişmiş analitik",
                 "A/B testing",
-                "Branding kaldırma",
-                "API erişimi"
+                "Branding kaldırma"
             ],
             cta: "Pro'ya Başla",
-            popular: true,
+            popular: true, // Best Value
             link: "/register?plan=pro"
         },
         {
@@ -48,16 +52,19 @@ export default function Pricing() {
             features: [
                 "Sınırsız görüntüleme",
                 "Sınırsız kampanya",
-                "Her şey dahil",
+                "Her şey dahil (Pro özellikleri)",
+                "🎡 Gamification (Çarkıfelek)",
+                "📧 Otomatik E-Posta",
+                "📊 Gelişmiş ROI ve Kâr Analizi",
                 "WhatsApp destek (7/24)",
                 "Özel onboarding",
                 "Dedicated hesap yöneticisi",
-                "Multi-domain desteği",
-                "Özel entegrasyonlar"
+                "Multi-domain desteği"
             ],
             cta: "Growth'a Geç",
             popular: false,
-            link: "/register?plan=growth"
+            link: "/register?plan=growth",
+            premium: true
         }
     ];
 
@@ -98,20 +105,34 @@ export default function Pricing() {
                                 </div>
                             </div>
 
-                            <ul className="space-y-3 mb-8">
+                            <ul className="space-y-3 mb-4">
                                 {plan.features.map((feature, i) => (
                                     <li key={i} className="flex items-start gap-3">
                                         <Check size={18} className="text-emerald-400 flex-shrink-0 mt-0.5" />
-                                        <span className="text-sm text-slate-300">{feature}</span>
+                                        <span className={`text-sm ${feature.includes('🎡') || feature.includes('📧') || feature.includes('📊') ? 'text-white font-bold' : 'text-slate-300'}`}>{feature}</span>
                                     </li>
                                 ))}
                             </ul>
+
+                            {/* Excluded features for free tier */}
+                            {plan.excluded && (
+                                <ul className="space-y-2 mb-6 pt-4 border-t border-white/5">
+                                    {plan.excluded.map((item, i) => (
+                                        <li key={i} className="flex items-start gap-3">
+                                            <span className="text-slate-600 flex-shrink-0">✕</span>
+                                            <span className="text-xs text-slate-500 line-through">{item}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
 
                             <Link
                                 href={plan.link}
                                 className={`block w-full py-4 rounded-xl text-center font-bold transition-all ${plan.popular
                                     ? 'bg-brand-orange hover:bg-amber-500 text-black shadow-lg hover:shadow-xl'
-                                    : 'bg-white/10 hover:bg-white/20 text-white border border-white/20'
+                                    : plan.premium
+                                        ? 'bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white shadow-lg shadow-cyan-500/20'
+                                        : 'bg-white/10 hover:bg-white/20 text-white border border-white/20'
                                     }`}
                             >
                                 {plan.cta}
@@ -147,7 +168,7 @@ export default function Pricing() {
                                 id: "analytics",
                                 icon: <BarChart3 size={24} className="text-emerald-400" />,
                                 name: "Premium Analytics",
-                                price: "₺99",
+                                price: "₺399",
                                 type: "/ay",
                                 typeLabel: "AYLIK ABONELİK",
                                 isOneTime: false,
@@ -167,7 +188,7 @@ export default function Pricing() {
                                 id: "ai",
                                 icon: <Sparkles size={24} className="text-yellow-400" />,
                                 name: "AI Metin Asistanı",
-                                price: "₺149",
+                                price: "₺99",
                                 type: "/ay",
                                 typeLabel: "AYLIK ABONELİK",
                                 isOneTime: false,
@@ -189,8 +210,8 @@ export default function Pricing() {
                                         <span className="text-xs text-slate-500">{addon.type}</span>
                                     </div>
                                     <div className={`inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-bold ${addon.isOneTime
-                                            ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                                            : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                                        ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                                        : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
                                         }`}>
                                         {addon.typeLabel}
                                     </div>

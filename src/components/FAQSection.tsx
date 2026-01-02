@@ -40,7 +40,7 @@ export default function FAQSection() {
         {
             icon: <Zap size={20} className="text-red-400" />,
             q: "Pop-up'lar ziyaretçileri rahatsız etmez mi?",
-            a: "Klasik pop-up'lar evet ama Popwise farklı. Smart Intent 2.0 ile sadece sayfadan çıkmak üzere olanları yakalıyoruz. Normal gezinme deneyimi hiç bozulmuyor."
+            a: "Klasik pop-up'lar evet ama Poplift farklı. Smart Intent 2.0 ile sadece sayfadan çıkmak üzere olanları yakalıyoruz. Normal gezinme deneyimi hiç bozulmuyor."
         },
         {
             icon: <Shield size={20} className="text-green-400" />,

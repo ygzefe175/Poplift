@@ -34,7 +34,7 @@ export default function HowItWorks() {
                         4 Adımda Kayıp Önleme
                     </h2>
                     <p className="text-slate-400 max-w-2xl mx-auto">
-                        Popwise, ziyaretçi davranışını gerçek zamanlı takip eder ve tam çıkış anında devreye girer.
+                        Poplift, ziyaretçi davranışını gerçek zamanlı takip eder ve tam çıkış anında devreye girer.
                     </p>
                 </div>
 

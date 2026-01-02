@@ -158,7 +158,7 @@ export default function DashboardPage() {
                             <span className="text-4xl font-black text-white">%{conversionRate}</span>
                         </div>
                         <p className="text-sm text-slate-300 font-bold mb-1 italic">Sektör Ortalamasının Üzerinde</p>
-                        <p className="text-[10px] text-slate-500 mt-1 font-medium">Popwise, rakiplerinden %40 daha efektif.</p>
+                        <p className="text-[10px] text-slate-500 mt-1 font-medium">Poplift, rakiplerinden %40 daha efektif.</p>
                     </div>
 
                     {/* Sales Recovery (Estimated) */}

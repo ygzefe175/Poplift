@@ -1,10 +1,10 @@
-
 "use client";
 
 import React, { useState } from 'react';
-import { X, MessageSquare, Zap, Layout, Sparkles, MousePointer2, Timer, Gift, Eye } from 'lucide-react';
+import { X, MessageSquare, Zap, Layout, Sparkles, MousePointer2, Timer, Gift, Eye, Lock } from 'lucide-react';
 import clsx from 'clsx';
 import confetti from 'canvas-confetti';
+import Link from 'next/link';
 
 interface CreateCampaignModalProps {
     isOpen: boolean;
@@ -45,6 +45,12 @@ export default function CreateCampaignModal({ isOpen, onClose, onSubmit }: Creat
     const [position, setPosition] = useState<'center' | 'top_right' | 'top_left' | 'bottom_right' | 'bottom_left' | 'top_center' | 'bottom_center'>('center');
     const [loading, setLoading] = useState(false);
 
+    // AI & Paywall States
+    const [isAiGenerating, setIsAiGenerating] = useState(false);
+    const [showAiPaywall, setShowAiPaywall] = useState(false);
+    // Simulating user plan status (Free tier by default to show upsell)
+    const hasAiAccess = false;
+
     if (!isOpen) return null;
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -66,15 +72,26 @@ export default function CreateCampaignModal({ isOpen, onClose, onSubmit }: Creat
     };
 
     const handleAiGenerate = () => {
-        const random = AI_SUGGESTIONS[Math.floor(Math.random() * AI_SUGGESTIONS.length)];
-        setHeadline(random.headline);
-        setSubtext(random.subtext);
-        setCta(random.cta);
+        if (!hasAiAccess) {
+            setShowAiPaywall(true);
+            return;
+        }
 
-        // Match template to text somewhat intelligently
-        if (random.headline.includes('Süre')) setTemplate('urgency');
-        else if (random.headline.includes('Hediye')) setTemplate('gift');
-        else setTemplate('standard');
+        setIsAiGenerating(true);
+        // Simulate thinking delay
+        setTimeout(() => {
+            const random = AI_SUGGESTIONS[Math.floor(Math.random() * AI_SUGGESTIONS.length)];
+            setHeadline(random.headline);
+            setSubtext(random.subtext);
+            setCta(random.cta);
+
+            // Match template to text somewhat intelligently
+            if (random.headline.includes('Süre')) setTemplate('urgency');
+            else if (random.headline.includes('Hediye')) setTemplate('gift');
+            else setTemplate('standard');
+
+            setIsAiGenerating(false);
+        }, 1500);
     };
 
     return (
@@ -87,7 +104,46 @@ export default function CreateCampaignModal({ isOpen, onClose, onSubmit }: Creat
                 </button>
 
                 {/* Left Side: Form */}
-                <div className="w-full md:w-5/12 p-8 border-r border-white/5 overflow-y-auto custom-scrollbar">
+                <div className="w-full md:w-5/12 p-8 border-r border-white/5 overflow-y-auto custom-scrollbar relative">
+
+                    {/* AI PAYWALL OVERLAY (Inside Form Column) */}
+                    {showAiPaywall && (
+                        <div className="absolute inset-0 z-50 bg-[#1C1C1E]/95 backdrop-blur-sm flex items-center justify-center p-8 animate-fade-in">
+                            <div className="text-center">
+                                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-indigo-500/20">
+                                    <Sparkles size={32} className="text-white animate-pulse" />
+                                </div>
+                                <h3 className="text-2xl font-black text-white mb-2">Magic Fill ✨</h3>
+                                <p className="text-slate-400 text-sm mb-6 leading-relaxed">
+                                    Yapay zeka asistanı, kampanya hedeflerinize uygun en etkileyici başlık ve metinleri saniyeler içinde yazar.
+                                </p>
+
+                                <div className="bg-white/5 border border-white/10 rounded-xl p-4 mb-6 text-left">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <span className="text-white font-bold text-sm">AI Metin Asistanı Paketi</span>
+                                        <span className="text-brand-orange font-black">₺99/ay</span>
+                                    </div>
+                                    <p className="text-xs text-slate-500">Sınırsız AI metin üretimi</p>
+                                </div>
+
+                                <div className="space-y-3">
+                                    <Link href="/register?addon=ai" className="block w-full py-3 bg-white text-black font-bold rounded-xl hover:bg-slate-200 transition-colors">
+                                        Paketi Satın Al (₺99)
+                                    </Link>
+                                    <Link href="/register?plan=pro" className="block w-full py-3 bg-brand-orange/10 text-brand-orange font-bold rounded-xl hover:bg-brand-orange/20 transition-colors">
+                                        Pro Pakete Geç (Tüm Özellikler)
+                                    </Link>
+                                    <button
+                                        onClick={() => setShowAiPaywall(false)}
+                                        className="text-xs text-slate-500 hover:text-white transition-colors mt-2"
+                                    >
+                                        Vazgeç
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     <div className="mb-8">
                         <div className="flex items-center gap-2 mb-2">
                             <div className="w-2 h-2 rounded-full bg-brand-orange animate-pulse"></div>
@@ -178,9 +234,20 @@ export default function CreateCampaignModal({ isOpen, onClose, onSubmit }: Creat
                                 <button
                                     type="button"
                                     onClick={handleAiGenerate}
-                                    className="flex items-center gap-1.5 text-xs font-bold text-indigo-400 hover:text-indigo-300 transition-colors px-2 py-1 rounded-lg hover:bg-indigo-500/10"
+                                    className="group flex items-center gap-1.5 text-xs font-bold text-white bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 transition-all px-3 py-1.5 rounded-lg shadow-lg shadow-indigo-500/20 border border-white/10"
                                 >
-                                    <Sparkles size={14} /> Magic Fill
+                                    {isAiGenerating ? (
+                                        <>
+                                            <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                            Yazıyor...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Sparkles size={14} className="group-hover:animate-pulse" />
+                                            Magic Fill <span className="opacity-50 text-[10px] ml-1 font-normal">(AI)</span>
+                                            {!hasAiAccess && <Lock size={10} className="ml-1 text-white/50" />}
+                                        </>
+                                    )}
                                 </button>
                             </div>
 
@@ -319,7 +386,7 @@ export default function CreateCampaignModal({ isOpen, onClose, onSubmit }: Creat
                                 </button>
 
                                 {position === 'center' && (
-                                    <p className="text-[10px] text-slate-600 mt-4 font-medium uppercase tracking-widest">Powered by Popwise</p>
+                                    <p className="text-[10px] text-slate-600 mt-4 font-medium uppercase tracking-widest">Powered by Poplift</p>
                                 )}
                             </div>
 

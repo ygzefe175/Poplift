@@ -18,7 +18,7 @@ export default function AddOns() {
             id: "analytics",
             icon: <BarChart3 size={24} className="text-emerald-400" />,
             name: "Premium Analytics",
-            price: "₺99",
+            price: "₺399",
             type: "/ay",
             typeLabel: "AYLIK ABONELİK",
             isOneTime: false,
@@ -76,8 +76,8 @@ export default function AddOns() {
                                     <span className="text-xs text-slate-500">{addon.type}</span>
                                 </div>
                                 <div className={`inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-bold ${addon.isOneTime
-                                        ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                                        : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                                    ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                                    : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
                                     }`}>
                                     {addon.typeLabel}
                                 </div>

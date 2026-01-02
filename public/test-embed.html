@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Müşteri Sitesi Simülasyonu - Popwise Entegrasyon Testi</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 200vh;
+            /* Make it scrollable to test scroll triggers */
+            color: white;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            padding: 60px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #f59e0b;
+        }
+
+        p {
+            font-size: 1.1rem;
+            opacity: 0.8;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .section {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 24px;
+        }
+
+        .section h2 {
+            color: #f59e0b;
+            margin-bottom: 16px;
+        }
+
+        .test-results {
+            background: rgba(0, 255, 0, 0.1);
+            border: 1px solid rgba(0, 255, 0, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .test-results h3 {
+            color: #4ade80;
+            margin-bottom: 12px;
+        }
+
+        .test-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .test-item:last-child {
+            border-bottom: none;
+        }
+
+        .status-ok {
+            color: #4ade80;
+        }
+
+        .status-pending {
+            color: #facc15;
+        }
+
+        .status-error {
+            color: #f87171;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 40px;
+            opacity: 0.6;
+            margin-top: 100px;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 16px 32px;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: #000;
+            font-weight: 700;
+            border-radius: 12px;
+            text-decoration: none;
+            margin-top: 20px;
+        }
+    </style>
+
+    <!-- POPWISE ENTEGRASYON KODU - Bu kısmı müşteri sitesine ekleyecek -->
+    <!-- Test için "demo" parametresi kullanılıyor - gerçek kullanımda user_id olacak -->
+    <!-- analytics=true parametresi eklenerek Web Analitik aktif edildi -->
+    <script>
+        // Test başladı logla
+        console.log('🧪 [TEST] Popwise entegrasyon testi başlatıldı');
+        console.log('📡 [TEST] API URL: https://popwisee.vercel.app/api/pixel?id=demo&analytics=true');
+        console.log('📊 [TEST] Web Analytics: AKTIF');
+    </script>
+    <script src="https://popwisee.vercel.app/api/pixel?id=demo&analytics=true" async></script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛒 Demo E-Ticaret Sitesi</h1>
+            <p>Bu sayfa, Popwise embed kodunun müşteri sitesinde nasıl çalıştığını test etmek için oluşturulmuştur.</p>
+            <p><strong>Not:</strong> Sayfayı kaydırın veya fareyi yukarı çıkarın (exit intent) pop-up'ları tetiklemek
+                için.</p>
+        </div>
+
+        <div class="section">
+            <h2>📦 Ürünlerimiz</h2>
+            <p>Premium kalite ürünlerle tanışın. Hemen alışverişe başlayın ve fırsatları kaçırmayın!</p>
+            <a href="#" class="cta-button">Alışverişe Başla</a>
+        </div>
+
+        <div class="section">
+            <h2>🚀 Hızlı Teslimat</h2>
+            <p>Tüm siparişleriniz 24 saat içinde kargoya verilir. 100 TL üzeri siparişlerde ücretsiz kargo!</p>
+        </div>
+
+        <div class="section">
+            <h2>💳 Güvenli Ödeme</h2>
+            <p>256-bit SSL şifreleme ile tüm ödemeleriniz güvende. Kredi kartı, havale veya kapıda ödeme seçenekleri.
+            </p>
+        </div>
+
+        <div class="test-results" id="testResults">
+            <h3>🔬 Popwise Entegrasyon Test Sonuçları</h3>
+            <div class="test-item">
+                <span class="status-pending" id="scriptStatus">⏳</span>
+                <span>Pixel Script Yüklenmesi</span>
+            </div>
+            <div class="test-item">
+                <span class="status-pending" id="initStatus">⏳</span>
+                <span>POPWISE Objesi Başlatılması</span>
+            </div>
+            <div class="test-item">
+                <span class="status-pending" id="apiStatus">⏳</span>
+                <span>API Bağlantısı</span>
+            </div>
+            <div class="test-item">
+                <span class="status-pending" id="popupStatus">⏳</span>
+                <span>Pop-up Hazır / Gösterildi</span>
+            </div>
+        </div>
+
+        <div class="section" style="margin-top: 200px;">
+            <h2>📞 İletişim</h2>
+            <p>Sorularınız için bize ulaşın: destek@demo-site.com</p>
+        </div>
+
+        <div class="footer">
+            <p>Bu sayfa Popwise entegrasyon testi içindir.</p>
+            <p>© 2024 Demo Site</p>
+        </div>
+    </div>
+
+    <script>
+        // Test sonuçlarını kontrol et
+        setTimeout(function () {
+            // Script yüklendi mi?
+            var scriptEl = document.getElementById('scriptStatus');
+            if (typeof window.POPWISE !== 'undefined') {
+                scriptEl.textContent = '✅';
+                scriptEl.className = 'status-ok';
+                console.log('✅ [TEST] POPWISE objesi bulundu:', window.POPWISE);
+            } else if (typeof window.POPWISE_INITIALIZED !== 'undefined') {
+                scriptEl.textContent = '✅';
+                scriptEl.className = 'status-ok';
+                console.log('✅ [TEST] POPWISE_INITIALIZED flag bulundu');
+            } else {
+                scriptEl.textContent = '❌';
+                scriptEl.className = 'status-error';
+                console.log('❌ [TEST] POPWISE objesi bulunamadı');
+            }
+
+            // Init durumu
+            var initEl = document.getElementById('initStatus');
+            if (window.POPWISE && window.POPWISE.version) {
+                initEl.textContent = '✅';
+                initEl.className = 'status-ok';
+                console.log('✅ [TEST] Popwise versiyon:', window.POPWISE.version);
+            } else {
+                initEl.textContent = '⚠️';
+                initEl.className = 'status-pending';
+            }
+
+            // API durumu - popups array kontrol et
+            var apiEl = document.getElementById('apiStatus');
+            if (window.POPWISE && Array.isArray(window.POPWISE.popups)) {
+                apiEl.textContent = '✅';
+                apiEl.className = 'status-ok';
+                console.log('✅ [TEST] API yanıt geldi, popup sayısı:', window.POPWISE.popups.length);
+            } else {
+                apiEl.textContent = '⚠️';
+                apiEl.className = 'status-pending';
+            }
+
+            // Popup durumu
+            var popupEl = document.getElementById('popupStatus');
+            if (window.POPWISE && window.POPWISE.popups && window.POPWISE.popups.length > 0) {
+                popupEl.textContent = '✅';
+                popupEl.className = 'status-ok';
+            } else {
+                popupEl.textContent = 'ℹ️ (0 aktif popup)';
+                popupEl.className = 'status-pending';
+            }
+
+            console.log('🧪 [TEST] Test tamamlandı');
+            console.log('📊 [TEST] Son durum:', {
+                POPWISE_EXISTS: typeof window.POPWISE !== 'undefined',
+                POPWISE_INITIALIZED: window.POPWISE_INITIALIZED,
+                POPWISE_DATA: window.POPWISE
+            });
+        }, 3000);
+    </script>
+</body>
+
+</html>

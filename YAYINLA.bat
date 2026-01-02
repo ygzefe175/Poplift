@@ -1,5 +1,5 @@
 @echo off
-echo 🚀 PoopUp Yayina Aliniyor...
+echo 🚀 Poplift Yayina Aliniyor...
 echo ---------------------------------------
 call npx vercel --prod
 if %ERRORLEVEL% NEQ 0 (

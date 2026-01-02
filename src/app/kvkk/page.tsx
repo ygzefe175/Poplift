@@ -34,9 +34,9 @@ export default function KVKKPage() {
                             <div>
                                 <h3 className="text-lg font-bold text-white mb-2">Veri Sorumlusu</h3>
                                 <p className="text-slate-400">
-                                    <strong className="text-white">Popwise Teknoloji A.Ş.</strong><br />
+                                    <strong className="text-white">Poplift Teknoloji A.Ş.</strong><br />
                                     Maslak, Sarıyer / İstanbul<br />
-                                    hello@popwise.com
+                                    hello@Poplift.com
                                 </p>
                             </div>
                         </div>
@@ -45,7 +45,7 @@ export default function KVKKPage() {
                     <div className="bg-[#1C1C1E] border border-white/10 rounded-2xl p-8 mb-8">
                         <h2 className="text-2xl font-bold text-white mb-4">1. Amaç</h2>
                         <p className="text-slate-400 leading-relaxed">
-                            6698 sayılı Kişisel Verilerin Korunması Kanunu ("KVKK") kapsamında, Popwise Teknoloji A.Ş.
+                            6698 sayılı Kişisel Verilerin Korunması Kanunu ("KVKK") kapsamında, Poplift Teknoloji A.Ş.
                             olarak kişisel verilerinizin işlenmesine ilişkin sizleri bilgilendirmek amacıyla bu
                             aydınlatma metnini hazırladık.
                         </p>
@@ -140,7 +140,7 @@ export default function KVKKPage() {
                         </p>
                         <div className="flex items-center gap-3 text-brand-orange">
                             <Mail size={18} />
-                            <a href="mailto:kvkk@popwise.com" className="hover:underline">kvkk@popwise.com</a>
+                            <a href="mailto:kvkk@Poplift.com" className="hover:underline">kvkk@Poplift.com</a>
                         </div>
                         <p className="text-slate-500 text-sm mt-4">
                             Başvurularınız en geç 30 gün içinde ücretsiz olarak yanıtlanacaktır.

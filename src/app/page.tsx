@@ -15,6 +15,7 @@ import BrandLogos from '@/components/BrandLogos';
 import HowItWorks from '@/components/HowItWorks';
 import Features from '@/components/Features';
 import Pricing from '@/components/Pricing';
+import TemplateShowcase from '@/components/TemplateShowcase';
 import { ArrowRight, Check, Zap, MousePointer2, Sparkles, Building2, ShieldCheck, Mail, Target, Rocket, Clock } from 'lucide-react';
 
 export default function Home() {
@@ -88,7 +89,7 @@ export default function Home() {
       <section className="py-24 px-6 bg-white/[0.01]">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <p className="text-brand-orange font-bold text-xs uppercase tracking-[0.2em] mb-4">Neden Popwise?</p>
+            <p className="text-brand-orange font-bold text-xs uppercase tracking-[0.2em] mb-4">Neden Poplift?</p>
             <h2 className="text-3xl md:text-5xl font-black text-white leading-tight">Karmaşık Rakiplerin Aksine <br /> Hafif, Akıllı ve Sonuç Odaklı</h2>
           </div>
 
@@ -244,7 +245,7 @@ export default function Home() {
                   <div className="relative w-full max-w-sm bg-white rounded-2xl p-8 shadow-2xl transform hover:scale-105 transition-all duration-300 cursor-pointer">
                     {/* Badge */}
                     <div className="inline-block px-3 py-1 bg-gradient-to-r from-brand-orange to-amber-500 text-white text-xs font-black rounded-full mb-4 uppercase">
-                      Popwise Özel
+                      Poplift Özel
                     </div>
 
                     {/* Title */}
@@ -310,12 +311,12 @@ export default function Home() {
       <section className="py-24 px-6 bg-white/[0.02] border-y border-white/5">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-black text-white mb-4">Popwise Gerçekten İşliyor mu?</h2>
+            <h2 className="text-3xl md:text-4xl font-black text-white mb-4">Poplift Gerçekten İşliyor mu?</h2>
             <p className="text-slate-400">Rakamlarla konuşan bazı mutlu kullanıcılarımız:</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { n: "Elif Kara", r: "E-Ticaret Sahibi · elifyagi.com", q: "İlk hafta sepet terkleri %18 düştü. Reklam harcamam aynı ama gelir arttı. Popwise kurulumu 5 dakika sürdü, sonuçlar ilk gün başladı.", s: "₺12.000/ay ek gelir" },
+              { n: "Elif Kara", r: "E-Ticaret Sahibi · elifyagi.com", q: "İlk hafta sepet terkleri %18 düştü. Reklam harcamam aynı ama gelir arttı. Poplift kurulumu 5 dakika sürdü, sonuçlar ilk gün başladı.", s: "₺12.000/ay ek gelir" },
               { n: "Burak Yılmaz", r: "Dijital Ajans Kurucusu", q: "Müşterilerimize kuruyoruz. Özellikle e-ticarette çok işe yarıyor. Exit-intent sadece exit değil, doğru zamanlama yapıyor.", s: "%31 dönüşüm artışı" },
               { n: "Zeynep Aydın", r: "Online Eğitim Platformu", q: "Mail listesi büyütmek için kullanıyoruz. Hazır şablonlar kullanışlı, özelleştirme de kolay. İlk ayda 2.100 yeni abone.", s: "+2.100 abone" }
             ].map((t, i) => (
@@ -335,6 +336,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* 9️⃣ ŞABLON GALERİSİ (YENİ) */}
+      <TemplateShowcase />
 
       {/* 💰 FİYATLANDIRMA (Ekstra Güç Katın dahil) */}
       <Pricing />

@@ -26,7 +26,7 @@ export default function Navbar() {
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-orange opacity-75"></span>
                         <span className="relative inline-flex rounded-full h-3 w-3 bg-brand-orange"></span>
                     </span>
-                    Popwise
+                    Poplift
                 </Link>
                 <div className="hidden md:flex items-center gap-10 text-sm text-coffee-800/80 font-bold tracking-wide">
                     <Link href="/demo" className={clsx("hover:text-brand-orange transition-colors", pathname === '/demo' && "text-brand-orange")}>Demo</Link>

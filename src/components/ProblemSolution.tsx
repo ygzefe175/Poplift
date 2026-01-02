@@ -94,7 +94,7 @@ export default function ProblemSolution() {
                             <span className="text-3xl md:text-5xl text-slate-400">bugün alması için</span>
                         </h2>
                         <p className="text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed">
-                            Popwise, tam çıkacakken ziyaretçine <span className="text-brand-orange font-bold">cayamayacağı bir teklif sunar</span>.
+                            Poplift, tam çıkacakken ziyaretçine <span className="text-brand-orange font-bold">cayamayacağı bir teklif sunar</span>.
                             <br />Sonuç: <span className="text-emerald-400 font-bold">%27 daha fazla satış</span>, aynı reklam bütçesiyle.
                         </p>
                     </div>

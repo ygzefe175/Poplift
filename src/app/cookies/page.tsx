@@ -133,7 +133,7 @@ export default function CookiesPage() {
                         </p>
                         <div className="flex items-center gap-3 text-brand-orange">
                             <Mail size={18} />
-                            <a href="mailto:hello@popwise.com" className="hover:underline">hello@popwise.com</a>
+                            <a href="mailto:hello@Poplift.com" className="hover:underline">hello@Poplift.com</a>
                         </div>
                     </div>
                 </div>

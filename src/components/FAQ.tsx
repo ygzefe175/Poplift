@@ -124,10 +124,10 @@ export default function FAQ() {
                 <div className="mt-12 text-center">
                     <p className="text-slate-500 mb-4">Başka sorun mu var?</p>
                     <a
-                        href="mailto:hello@popwise.com"
+                        href="mailto:hello@Poplift.com"
                         className="inline-block px-8 py-3 bg-white/5 hover:bg-white/10 text-white font-bold rounded-xl border border-white/10 transition-all"
                     >
-                        Bize Yaz - hello@popwise.com
+                        Bize Yaz - hello@Poplift.com
                     </a>
                 </div>
             </div>

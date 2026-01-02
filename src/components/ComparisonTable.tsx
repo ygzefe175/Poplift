@@ -5,23 +5,23 @@ import { Check, X } from 'lucide-react';
 
 interface Feature {
     name: string;
-    popwise: string | boolean;
-    optinmonster: string | boolean;
-    privy: string | boolean;
+    Poplift: string | boolean;
+    competitorA: string | boolean;
+    competitorB: string | boolean;
 }
 
 export default function ComparisonTable() {
     const features: Feature[] = [
-        { name: "Aylık Maliyet", popwise: "₺0 - ₺799/ay", optinmonster: "$19-79/ay", privy: "$15-95/ay" },
-        { name: "Türkçe Panel", popwise: true, optinmonster: false, privy: false },
-        { name: "Exit-Intent", popwise: true, optinmonster: true, privy: true },
-        { name: "AI Optimizasyon", popwise: true, optinmonster: false, privy: false },
-        { name: "Kurulum Süresi", popwise: "3 dakika", optinmonster: "15-30 dakika", privy: "10-20 dakika" },
-        { name: "Müşteri Desteği", popwise: "Türkçe / 7/24", optinmonster: "İngilizce / Chat", privy: "İngilizce" },
-        { name: "Branding Kaldırma", popwise: "Pro ile dahil", optinmonster: "$79/ay ile", privy: "$95/ay ile" },
-        { name: "Mobil Uyumlu", popwise: true, optinmonster: true, privy: true },
-        { name: "Sınırsız Gösterim", popwise: "Growth ile", optinmonster: "$79/ay ile", privy: "Sınırlı" },
-        { name: "Yerli Ödeme", popwise: true, optinmonster: false, privy: false },
+        { name: "Aylık Maliyet", Poplift: "₺0 - ₺799/ay", competitorA: "$19-79/ay", competitorB: "$15-95/ay" },
+        { name: "Türkçe Panel", Poplift: true, competitorA: false, competitorB: false },
+        { name: "Exit-Intent", Poplift: true, competitorA: true, competitorB: true },
+        { name: "AI Optimizasyon", Poplift: true, competitorA: false, competitorB: false },
+        { name: "Kurulum Süresi", Poplift: "3 dakika", competitorA: "15-30 dakika", competitorB: "10-20 dakika" },
+        { name: "Müşteri Desteği", Poplift: "Türkçe / 7/24", competitorA: "İngilizce / Chat", competitorB: "İngilizce" },
+        { name: "Branding Kaldırma", Poplift: "Pro ile dahil", competitorA: "$79/ay ile", competitorB: "$95/ay ile" },
+        { name: "Mobil Uyumlu", Poplift: true, competitorA: true, competitorB: true },
+        { name: "Sınırsız Gösterim", Poplift: "Growth ile", competitorA: "$79/ay ile", competitorB: "Sınırlı" },
+        { name: "Yerli Ödeme", Poplift: true, competitorA: false, competitorB: false },
     ];
 
     return (
@@ -44,11 +44,11 @@ export default function ComparisonTable() {
                                     <th className="text-left p-6 text-slate-400 font-bold text-sm">Özellik</th>
                                     <th className="p-6 text-center">
                                         <div className="bg-gradient-to-br from-brand-orange to-amber-500 text-black font-black px-4 py-2 rounded-xl inline-block">
-                                            Popwise
+                                            Poplift
                                         </div>
                                     </th>
-                                    <th className="p-6 text-slate-400 font-bold text-sm text-center">OptinMonster</th>
-                                    <th className="p-6 text-slate-400 font-bold text-sm text-center">Privy</th>
+                                    <th className="p-6 text-slate-400 font-bold text-sm text-center">Rakip Firma A</th>
+                                    <th className="p-6 text-slate-400 font-bold text-sm text-center">Rakip Firma B</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -56,8 +56,8 @@ export default function ComparisonTable() {
                                     <tr key={i} className="border-b border-white/5 hover:bg-white/5 transition-colors">
                                         <td className="p-6 text-slate-300 font-medium">{feature.name}</td>
                                         <td className="p-6 text-center">
-                                            {typeof feature.popwise === 'boolean' ? (
-                                                feature.popwise ? (
+                                            {typeof feature.Poplift === 'boolean' ? (
+                                                feature.Poplift ? (
                                                     <div className="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto">
                                                         <Check size={16} className="text-emerald-400" />
                                                     </div>
@@ -67,12 +67,12 @@ export default function ComparisonTable() {
                                                     </div>
                                                 )
                                             ) : (
-                                                <span className="text-white font-bold">{feature.popwise}</span>
+                                                <span className="text-white font-bold">{feature.Poplift}</span>
                                             )}
                                         </td>
                                         <td className="p-6 text-center">
-                                            {typeof feature.optinmonster === 'boolean' ? (
-                                                feature.optinmonster ? (
+                                            {typeof feature.competitorA === 'boolean' ? (
+                                                feature.competitorA ? (
                                                     <div className="w-6 h-6 rounded-full bg-slate-500/20 flex items-center justify-center mx-auto">
                                                         <Check size={16} className="text-slate-500" />
                                                     </div>
@@ -82,12 +82,12 @@ export default function ComparisonTable() {
                                                     </div>
                                                 )
                                             ) : (
-                                                <span className="text-slate-500 text-sm">{feature.optinmonster}</span>
+                                                <span className="text-slate-500 text-sm">{feature.competitorA}</span>
                                             )}
                                         </td>
                                         <td className="p-6 text-center">
-                                            {typeof feature.privy === 'boolean' ? (
-                                                feature.privy ? (
+                                            {typeof feature.competitorB === 'boolean' ? (
+                                                feature.competitorB ? (
                                                     <div className="w-6 h-6 rounded-full bg-slate-500/20 flex items-center justify-center mx-auto">
                                                         <Check size={16} className="text-slate-500" />
                                                     </div>
@@ -97,7 +97,7 @@ export default function ComparisonTable() {
                                                     </div>
                                                 )
                                             ) : (
-                                                <span className="text-slate-500 text-sm">{feature.privy}</span>
+                                                <span className="text-slate-500 text-sm">{feature.competitorB}</span>
                                             )}
                                         </td>
                                     </tr>
@@ -108,9 +108,9 @@ export default function ComparisonTable() {
 
                     <div className="p-8 bg-gradient-to-r from-brand-orange/10 to-transparent border-t border-white/10 text-center">
                         <p className="text-white font-bold text-lg mb-4">
-                            OptinMonster'a yılda <span className="text-brand-orange">$948</span> ödeyecekken,
+                            Yabancı rakiplere yılda <span className="text-brand-orange">$500+</span> ödeyecekken,
                             <br />
-                            Popwise ile <span className="text-brand-orange">₺0'dan başla</span>, büyüdükçe upgrade et.
+                            Poplift ile <span className="text-brand-orange">₺0&apos;dan başla</span>, büyüdükçe upgrade et.
                         </p>
                         <a
                             href="/register"
