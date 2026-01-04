@@ -1,33 +1,167 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { ShieldCheck, CreditCard, Lock, CheckCircle2 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { ShieldCheck, CreditCard, Lock, CheckCircle2, Sparkles, Target, Zap, BarChart3 } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
 
-export default function CheckoutPage() {
+// Product configurations
+const PRODUCTS = {
+    ai: {
+        name: 'AI Metin Asistanı',
+        description: 'Magic Fill - Sınırsız AI metin üretimi',
+        price: 99,
+        icon: Sparkles,
+        color: 'from-indigo-500 to-purple-600',
+        addonType: 'ai_assistant',
+        features: [
+            'Sınırsız AI metin üretimi',
+            'Kampanya başlıkları ve açıklamaları',
+            'Dönüşüm odaklı CTA önerileri',
+            'Türkçe optimizeli içerikler'
+        ]
+    },
+    pro: {
+        name: 'Pro Paket',
+        description: 'Tüm özellikler dahil',
+        price: 399,
+        icon: Zap,
+        color: 'from-brand-orange to-amber-500',
+        planType: 'pro',
+        features: [
+            'Sınırsız pop-up kampanyası',
+            'Çarkıfelek (Gamification)',
+            'Magic Fill (AI) dahil',
+            'Gelişmiş hedefleme',
+            'Öncelikli destek'
+        ]
+    },
+    growth: {
+        name: 'Growth Paket',
+        description: 'Kurumsal çözümler',
+        price: 799,
+        icon: BarChart3,
+        color: 'from-emerald-500 to-teal-500',
+        planType: 'growth',
+        features: [
+            'Pro paketteki tüm özellikler',
+            'Gelişmiş ROI ve kâr analizi',
+            'A/B Test desteği',
+            'API erişimi',
+            'Özel entegrasyon desteği'
+        ]
+    },
+    analytics: {
+        name: 'Web Analitik Paketi',
+        description: 'Detaylı ziyaretçi analitiği',
+        price: 149,
+        icon: BarChart3,
+        color: 'from-cyan-500 to-blue-500',
+        addonType: 'analytics',
+        features: [
+            'Gerçek zamanlı ziyaretçi takibi',
+            'Sayfa görüntüleme analitiği',
+            'Cihaz ve tarayıcı dağılımı',
+            'Dönüşüm hunisi analizi'
+        ]
+    }
+};
+
+function CheckoutContent() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
+    const [userId, setUserId] = useState<string | null>(null);
+    const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
     const [cardName, setCardName] = useState('');
     const [cardNumber, setCardNumber] = useState('');
     const [expiry, setExpiry] = useState('');
     const [cvc, setCvc] = useState('');
 
-    const handlePayment = (e: React.FormEvent) => {
+    // Get product from URL params
+    const productKey = searchParams.get('product') || searchParams.get('addon') || searchParams.get('plan') || 'pro';
+    const product = PRODUCTS[productKey as keyof typeof PRODUCTS] || PRODUCTS.pro;
+    const ProductIcon = product.icon;
+
+    // Check authentication on mount
+    useEffect(() => {
+        const checkAuth = async () => {
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) {
+                    setUserId(user.id);
+                } else {
+                    // Not logged in, redirect to register with return URL
+                    router.push(`/register?redirect=/checkout?product=${productKey}`);
+                }
+            } catch (error) {
+                console.error('Auth check error:', error);
+                router.push('/login');
+            } finally {
+                setIsCheckingAuth(false);
+            }
+        };
+        checkAuth();
+    }, [productKey, router]);
+
+    const handlePayment = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!userId) {
+            router.push('/login');
+            return;
+        }
+
         setLoading(true);
 
-        // Simulate payment processing
-        setTimeout(() => {
-            setLoading(false);
+        try {
+            // Simulate payment processing
+            await new Promise(resolve => setTimeout(resolve, 2000));
+
+            // Update subscription based on product type
+            if ('addonType' in product && product.addonType) {
+                // It's an addon
+                const response = await fetch('/api/subscription', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: userId,
+                        addon_type: product.addonType
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Subscription update failed');
+                }
+            } else if ('planType' in product && product.planType) {
+                // It's a plan upgrade - update plan_type in user_subscriptions
+                const { error } = await supabase
+                    .from('user_subscriptions')
+                    .upsert({
+                        user_id: userId,
+                        plan_type: product.planType,
+                        has_ai_assistant: true, // Pro includes AI
+                        updated_at: new Date().toISOString()
+                    }, { onConflict: 'user_id' });
+
+                if (error) {
+                    console.error('Plan update error:', error);
+                    throw error;
+                }
+            }
+
             setSuccess(true);
             setTimeout(() => {
                 router.push('/dashboard?payment=success');
             }, 2000);
-        }, 2000);
+        } catch (error) {
+            console.error('Payment error:', error);
+            alert('Ödeme işlemi sırasında bir hata oluştu. Lütfen tekrar deneyin.');
+            setLoading(false);
+        }
     };
 
     // Simple formatting functions
@@ -39,6 +173,17 @@ export default function CheckoutPage() {
         return value.replace(/\D/g, '').replace(/(\d{2})(\d)/, '$1/$2').slice(0, 5);
     };
 
+    if (isCheckingAuth) {
+        return (
+            <main className="min-h-screen bg-[#000212] flex items-center justify-center">
+                <div className="text-center">
+                    <div className="w-12 h-12 border-4 border-brand-orange/30 border-t-brand-orange rounded-full animate-spin mx-auto mb-4"></div>
+                    <p className="text-slate-400">Yükleniyor...</p>
+                </div>
+            </main>
+        );
+    }
+
     if (success) {
         return (
             <main className="min-h-screen bg-[#000212] flex items-center justify-center">
@@ -47,7 +192,7 @@ export default function CheckoutPage() {
                         <CheckCircle2 size={48} className="text-white" />
                     </div>
                     <h1 className="text-3xl font-black text-white mb-2">Ödeme Başarılı!</h1>
-                    <p className="text-slate-400">Pro hesabınız aktif edildi. Yönlendiriliyorsunuz...</p>
+                    <p className="text-slate-400">{product.name} aktif edildi. Yönlendiriliyorsunuz...</p>
                 </div>
             </main>
         );
@@ -71,19 +216,37 @@ export default function CheckoutPage() {
                             <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4">Sipariş Özeti</h3>
 
                             <div className="flex items-center justify-between py-4 border-b border-white/5">
-                                <div>
-                                    <h4 className="font-bold text-white text-lg">Pro Paket</h4>
-                                    <p className="text-sm text-slate-400">Aylık Abonelik</p>
+                                <div className="flex items-center gap-4">
+                                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-r ${product.color} flex items-center justify-center`}>
+                                        <ProductIcon size={24} className="text-white" />
+                                    </div>
+                                    <div>
+                                        <h4 className="font-bold text-white text-lg">{product.name}</h4>
+                                        <p className="text-sm text-slate-400">{product.description}</p>
+                                    </div>
                                 </div>
                                 <div className="text-right">
-                                    <div className="text-xl font-black text-white">₺399</div>
+                                    <div className="text-xl font-black text-white">₺{product.price}</div>
                                     <div className="text-xs text-slate-500">/ay</div>
                                 </div>
                             </div>
 
+                            {/* Features */}
+                            <div className="py-4 border-b border-white/5">
+                                <p className="text-xs font-bold text-slate-500 uppercase mb-3">Dahil Özellikler</p>
+                                <ul className="space-y-2">
+                                    {product.features.map((feature, index) => (
+                                        <li key={index} className="flex items-center gap-2 text-sm text-slate-300">
+                                            <CheckCircle2 size={14} className="text-emerald-500" />
+                                            {feature}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+
                             <div className="flex items-center justify-between pt-4">
                                 <span className="text-slate-400 font-medium">Toplam Tutar</span>
-                                <span className="text-2xl font-black text-brand-orange">₺399</span>
+                                <span className="text-2xl font-black text-brand-orange">₺{product.price}</span>
                             </div>
                         </div>
 
@@ -172,9 +335,16 @@ export default function CheckoutPage() {
                                 <button
                                     type="submit"
                                     disabled={loading}
-                                    className="w-full py-4 rounded-xl bg-brand-orange text-black font-black text-lg hover:brightness-110 transition-all shadow-lg shadow-brand-orange/20 flex items-center justify-center gap-2"
+                                    className={`w-full py-4 rounded-xl bg-gradient-to-r ${product.color} text-white font-black text-lg hover:brightness-110 transition-all shadow-lg flex items-center justify-center gap-2`}
                                 >
-                                    {loading ? 'İşleniyor...' : <>Ödemeyi Yap <ShieldCheck size={20} /></>}
+                                    {loading ? (
+                                        <>
+                                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                            İşleniyor...
+                                        </>
+                                    ) : (
+                                        <>Ödemeyi Yap (₺{product.price}) <ShieldCheck size={20} /></>
+                                    )}
                                 </button>
                                 <p className="text-center text-xs text-slate-500 mt-4 flex items-center justify-center gap-1">
                                     <Lock size={10} />
@@ -189,5 +359,20 @@ export default function CheckoutPage() {
 
             <Footer />
         </main>
+    );
+}
+
+export default function CheckoutPage() {
+    return (
+        <Suspense fallback={
+            <main className="min-h-screen bg-[#000212] flex items-center justify-center">
+                <div className="text-center">
+                    <div className="w-12 h-12 border-4 border-brand-orange/30 border-t-brand-orange rounded-full animate-spin mx-auto mb-4"></div>
+                    <p className="text-slate-400">Yükleniyor...</p>
+                </div>
+            </main>
+        }>
+            <CheckoutContent />
+        </Suspense>
     );
 }

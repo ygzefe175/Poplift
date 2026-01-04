@@ -152,16 +152,22 @@ export default function NotificationStack() {
     useEffect(() => {
         setIsClient(true);
 
-        // Check localStorage for preference
-        const stored = localStorage.getItem('poplift_notifications_preference');
-        if (stored === 'disabled') {
-            setNotificationsEnabled(false);
-        } else if (stored === null) {
-            // First visit or no preference set - show preference modal after 5 seconds
-            const timer = setTimeout(() => {
-                setShowPreference(true);
-            }, 5000);
-            return () => clearTimeout(timer);
+        // Check localStorage for preference with safe access
+        try {
+            if (typeof window !== 'undefined' && window.localStorage) {
+                const stored = localStorage.getItem('poplift_notifications_preference');
+                if (stored === 'disabled') {
+                    setNotificationsEnabled(false);
+                } else if (stored === null) {
+                    // First visit or no preference set - show preference modal after 5 seconds
+                    const timer = setTimeout(() => {
+                        setShowPreference(true);
+                    }, 5000);
+                    return () => clearTimeout(timer);
+                }
+            }
+        } catch {
+            // localStorage not available, continue with defaults
         }
     }, []);
 
@@ -170,13 +176,25 @@ export default function NotificationStack() {
     };
 
     const handleAcceptNotifications = () => {
-        localStorage.setItem('poplift_notifications_preference', 'enabled');
+        try {
+            if (typeof window !== 'undefined' && window.localStorage) {
+                localStorage.setItem('poplift_notifications_preference', 'enabled');
+            }
+        } catch {
+            // localStorage not available
+        }
         setShowPreference(false);
         setNotificationsEnabled(true);
     };
 
     const handleDeclineNotifications = () => {
-        localStorage.setItem('poplift_notifications_preference', 'disabled');
+        try {
+            if (typeof window !== 'undefined' && window.localStorage) {
+                localStorage.setItem('poplift_notifications_preference', 'disabled');
+            }
+        } catch {
+            // localStorage not available
+        }
         setShowPreference(false);
         setNotificationsEnabled(false);
     };

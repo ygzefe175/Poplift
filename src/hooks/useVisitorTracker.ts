@@ -58,14 +58,20 @@ export function useVisitorTracker() {
         };
 
         // Check localstorage for simple returning visitor logic
-        const visits = localStorage.getItem('visit_count');
-        if (!visits) {
-            localStorage.setItem('visit_count', '1');
-            // First time visitors default to Trust Seeking until they prove otherwise
-            setTag(prev => prev === 'standard' ? 'trust_seeking' : prev);
-        } else {
-            const count = parseInt(visits);
-            localStorage.setItem('visit_count', (count + 1).toString());
+        try {
+            if (typeof window !== 'undefined' && window.localStorage) {
+                const visits = localStorage.getItem('visit_count');
+                if (!visits) {
+                    localStorage.setItem('visit_count', '1');
+                    // First time visitors default to Trust Seeking until they prove otherwise
+                    setTag(prev => prev === 'standard' ? 'trust_seeking' : prev);
+                } else {
+                    const count = parseInt(visits);
+                    localStorage.setItem('visit_count', (count + 1).toString());
+                }
+            }
+        } catch {
+            // localStorage not available, continue silently
         }
 
         window.addEventListener('scroll', handleScroll);

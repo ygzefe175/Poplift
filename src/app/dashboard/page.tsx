@@ -23,6 +23,10 @@ export default function DashboardPage() {
     // Plan status (Default to true to show analytics demo)
     const [isPremiumAnalytics, setIsPremiumAnalytics] = React.useState(true);
 
+    // User plan status - default to 'free'
+    const [userPlan, setUserPlan] = React.useState<'free' | 'pro' | 'growth'>('free');
+    const [isLoadingPlan, setIsLoadingPlan] = React.useState(true);
+
     // Fetch popups for stats
     const { popups, loading: popupsLoading, createPopup, deletePopup, togglePopupStatus } = usePopups(user?.id ?? null);
     const activePopupsCount = popups.filter(p => p.is_active).length;
@@ -33,6 +37,35 @@ export default function DashboardPage() {
     // Simple logic to detect if script is "installed" (user clicked copy)
     // Ideally we would check for incoming data events in a real app
     const [scriptInstalled, setScriptInstalled] = React.useState(false);
+
+    // Fetch user subscription/plan status
+    useEffect(() => {
+        const fetchPlanStatus = async () => {
+            if (!user?.id) return;
+
+            try {
+                const response = await fetch(`/api/subscription?user_id=${user.id}`);
+                const data = await response.json();
+
+                if (data.success && data.subscription) {
+                    const planType = data.subscription.plan_type || 'free';
+                    setUserPlan(planType as 'free' | 'pro' | 'growth');
+
+                    // Also set analytics access
+                    const hasAnalytics = planType === 'pro' || planType === 'growth' || data.subscription.has_analytics;
+                    setIsPremiumAnalytics(hasAnalytics);
+                }
+            } catch (error) {
+                console.error('Plan status fetch error:', error);
+            } finally {
+                setIsLoadingPlan(false);
+            }
+        };
+
+        if (user?.id) {
+            fetchPlanStatus();
+        }
+    }, [user?.id]);
 
     useEffect(() => {
         if (!loading && !user) {
@@ -228,9 +261,16 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Campaigns List - Group 2: Management */}
-                <div className="mb-16">
+                <div className="mb-16 relative">
                     <div className="mb-6 flex items-center justify-between">
-                        <h2 className="text-2xl font-black text-white">Kampanyaların</h2>
+                        <div className="flex items-center gap-3">
+                            <h2 className="text-2xl font-black text-white">Kampanyaların</h2>
+                            {userPlan === 'free' && (
+                                <span className="px-2 py-1 rounded-lg bg-amber-500/20 border border-amber-500/30 text-amber-400 text-[10px] font-black tracking-widest uppercase">
+                                    {popups.length}/2 Kampanya
+                                </span>
+                            )}
+                        </div>
                         <button
                             onClick={() => router.push('/embed-test')}
                             className="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold rounded-xl transition-all shadow-lg shadow-purple-500/20 flex items-center gap-2 text-sm"
@@ -238,12 +278,37 @@ export default function DashboardPage() {
                             🧪 Embed Test
                         </button>
                     </div>
+
+                    {/* Free Plan Campaign Limit Warning */}
+                    {userPlan === 'free' && popups.length >= 2 && (
+                        <div className="mb-6 bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/30 rounded-2xl p-6">
+                            <div className="flex items-start gap-4">
+                                <div className="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center flex-shrink-0">
+                                    <Zap size={24} className="text-amber-400" />
+                                </div>
+                                <div className="flex-1">
+                                    <h3 className="text-lg font-bold text-white mb-1">Kampanya Limitine Ulaştınız</h3>
+                                    <p className="text-slate-400 text-sm mb-4">
+                                        Ücretsiz planda maksimum 2 kampanya oluşturabilirsiniz. Sınırsız kampanya ve gelişmiş özellikler için Pro pakete geçin.
+                                    </p>
+                                    <button
+                                        onClick={() => router.push('/checkout?product=pro')}
+                                        className="px-6 py-3 bg-gradient-to-r from-brand-orange to-amber-500 text-black font-bold rounded-xl hover:brightness-110 transition-all shadow-lg shadow-brand-orange/20 flex items-center gap-2"
+                                    >
+                                        <Zap size={18} fill="black" /> Pro'ya Geç - Sınırsız Kampanya
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     <CampaignList
                         popups={popups}
                         loading={popupsLoading}
                         createPopup={createPopup}
                         deletePopup={deletePopup}
                         togglePopupStatus={togglePopupStatus}
+                        userPlan={userPlan}
                     />
                 </div>
 
@@ -256,7 +321,7 @@ export default function DashboardPage() {
                         </div>
                         {!isPremiumAnalytics && (
                             <button onClick={() => router.push('/pricing')} className="px-6 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-black text-sm transition-all shadow-lg shadow-indigo-500/20">
-                                ₺399/Ay ile Analitiği Aç
+                                ₺149/Ay ile Analitiği Aç
                             </button>
                         )}
                     </div>

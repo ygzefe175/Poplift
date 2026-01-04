@@ -1,6 +1,56 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://mobmyuvmszuahoqkdhnl.supabase.co';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1vYm15dXZtc3p1YWhvcWtkaG5sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjY4NjQzNzUsImV4cCI6MjA4MjQ0MDM3NX0.b6WGybmTu6kukY2yb2mGRuYhwUldIF30r72AtZsgUPo';
+// Get environment variables
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Create a singleton instance for client-side
+let supabaseInstance: SupabaseClient | null = null;
+
+function getSupabaseClient(): SupabaseClient {
+    // Return existing instance if available
+    if (supabaseInstance) {
+        return supabaseInstance;
+    }
+
+    // Check if we have valid credentials
+    if (!supabaseUrl || !supabaseAnonKey) {
+        console.warn('[Supabase] Missing environment variables. Using fallback...');
+        // For development/demo purposes, create a mock client that won't crash
+        // In production, these should always be set
+    }
+
+    supabaseInstance = createClient(
+        supabaseUrl || 'https://placeholder.supabase.co',
+        supabaseAnonKey || 'placeholder-key',
+        {
+            auth: {
+                autoRefreshToken: true,
+                persistSession: true,
+                detectSessionInUrl: true
+            }
+        }
+    );
+
+    return supabaseInstance;
+}
+
+// Export the singleton client
+export const supabase = getSupabaseClient();
+
+// Server-side client with service role (for API routes only)
+export function createServerClient(): SupabaseClient | null {
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!supabaseUrl || !serviceRoleKey) {
+        console.warn('[Supabase Server] Missing environment variables');
+        return null;
+    }
+
+    return createClient(supabaseUrl, serviceRoleKey, {
+        auth: {
+            autoRefreshToken: false,
+            persistSession: false
+        }
+    });
+}

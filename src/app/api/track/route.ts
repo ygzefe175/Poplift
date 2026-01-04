@@ -1,13 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-
-// CORS headers for all responses
-const corsHeaders = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    'Access-Control-Max-Age': '86400',
-};
+import { checkRateLimit, getClientIP, isValidUUID, getCorsHeaders } from '@/lib/security';
 
 // Create Supabase client with proper error handling
 function getSupabaseClient(): SupabaseClient | null {
@@ -27,19 +20,28 @@ function getSupabaseClient(): SupabaseClient | null {
     });
 }
 
-// Validate UUID format
-function isValidUUID(str: string): boolean {
-    if (!str || typeof str !== 'string') return false;
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    return uuidRegex.test(str);
-}
-
-// Valid event types
-const VALID_EVENT_TYPES = ['impression', 'click', 'close', 'conversion'];
+// Valid event types (whitelist)
+const VALID_EVENT_TYPES = ['impression', 'click', 'close', 'conversion'] as const;
+type EventType = typeof VALID_EVENT_TYPES[number];
 
 export async function POST(request: NextRequest) {
+    const origin = request.headers.get('origin');
+    const corsHeaders = getCorsHeaders(origin);
+
     try {
-        // Parse request body
+        // Rate limiting - 200 requests per minute per IP (tracking is high volume)
+        const clientIP = getClientIP(request);
+        const rateLimit = checkRateLimit(`track_${clientIP}`, 200, 60000);
+
+        if (!rateLimit.allowed) {
+            // Still return 200 to not break client-side tracking
+            return NextResponse.json(
+                { success: true, warning: 'Rate limited' },
+                { status: 200, headers: corsHeaders }
+            );
+        }
+
+        // Parse request body safely
         let body;
         try {
             body = await request.json();
@@ -52,7 +54,7 @@ export async function POST(request: NextRequest) {
 
         const { popup_id, event_type, url, user_agent } = body;
 
-        // Validate popup_id
+        // Validate popup_id (required, must be UUID)
         if (!popup_id || !isValidUUID(popup_id)) {
             return NextResponse.json(
                 { success: false, error: 'Valid popup_id is required' },
@@ -60,8 +62,8 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Validate event_type
-        if (!event_type || !VALID_EVENT_TYPES.includes(event_type)) {
+        // Validate event_type (must be in whitelist)
+        if (!event_type || !VALID_EVENT_TYPES.includes(event_type as EventType)) {
             return NextResponse.json(
                 { success: false, error: 'Valid event_type is required' },
                 { status: 400, headers: corsHeaders }
@@ -71,10 +73,9 @@ export async function POST(request: NextRequest) {
         // Get Supabase client
         const supabase = getSupabaseClient();
         if (!supabase) {
-            // Still return success to not break the client
-            console.error('[Track API] Database connection unavailable');
+            // Return success to not break client
             return NextResponse.json(
-                { success: true, warning: 'Tracking skipped due to configuration' },
+                { success: true, warning: 'Tracking skipped - configuration missing' },
                 { status: 200, headers: corsHeaders }
             );
         }
@@ -133,13 +134,14 @@ export async function POST(request: NextRequest) {
             }
         }
 
-        // Log detailed event for analytics (optional - silently fail if table doesn't exist)
+        // Log detailed event for analytics (safely limit input sizes)
         try {
             await supabase.from('popup_events').insert({
                 popup_id,
                 event_type,
-                url: url?.substring(0, 2000) || null, // Limit URL length
-                user_agent: user_agent?.substring(0, 500) || null, // Limit user_agent length
+                url: typeof url === 'string' ? url.substring(0, 2000) : null,
+                user_agent: typeof user_agent === 'string' ? user_agent.substring(0, 500) : null,
+                ip_hash: clientIP ? Buffer.from(clientIP).toString('base64').substring(0, 32) : null, // Hash IP for privacy
                 created_at: new Date().toISOString()
             });
         } catch {
@@ -153,18 +155,19 @@ export async function POST(request: NextRequest) {
 
     } catch (error) {
         console.error('[Track API] Unexpected error:', error);
-        // Always return success to not break the client
+        // Always return success to not break client
         return NextResponse.json(
-            { success: true, warning: 'Tracking error occurred but was handled' },
+            { success: true, warning: 'Tracking error handled' },
             { status: 200, headers: corsHeaders }
         );
     }
 }
 
 // Handle CORS preflight
-export async function OPTIONS() {
+export async function OPTIONS(request: NextRequest) {
+    const origin = request.headers.get('origin');
     return new NextResponse(null, {
         status: 204,
-        headers: corsHeaders
+        headers: getCorsHeaders(origin)
     });
 }

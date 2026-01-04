@@ -18,7 +18,7 @@ export default function AddOns() {
             id: "analytics",
             icon: <BarChart3 size={24} className="text-emerald-400" />,
             name: "Premium Analytics",
-            price: "₺399",
+            price: "₺149",
             type: "/ay",
             typeLabel: "AYLIK ABONELİK",
             isOneTime: false,

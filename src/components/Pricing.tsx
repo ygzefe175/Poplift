@@ -25,7 +25,7 @@ export default function Pricing() {
         },
         {
             name: "Pro",
-            price: "₺299",
+            price: "₺399",
             period: "/ay",
             description: "Büyüyen e-ticaret siteleri",
             features: [
@@ -42,7 +42,7 @@ export default function Pricing() {
             ],
             cta: "Pro'ya Başla",
             popular: true, // Best Value
-            link: "/register?plan=pro"
+            link: "/checkout?product=pro"
         },
         {
             name: "Growth",
@@ -63,7 +63,7 @@ export default function Pricing() {
             ],
             cta: "Growth'a Geç",
             popular: false,
-            link: "/register?plan=growth",
+            link: "/checkout?product=growth",
             premium: true
         }
     ];
@@ -168,7 +168,7 @@ export default function Pricing() {
                                 id: "analytics",
                                 icon: <BarChart3 size={24} className="text-emerald-400" />,
                                 name: "Premium Analytics",
-                                price: "₺399",
+                                price: "₺149",
                                 type: "/ay",
                                 typeLabel: "AYLIK ABONELİK",
                                 isOneTime: false,

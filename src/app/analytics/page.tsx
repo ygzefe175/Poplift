@@ -238,7 +238,7 @@ export default function AnalyticsPage() {
                                     Detaylı raporlar, funnel analizi, cihaz dağılımı ve daha fazlası.
                                 </p>
                                 <div className="flex items-baseline justify-center gap-1 mb-6">
-                                    <span className="text-3xl font-black text-white">₺399</span>
+                                    <span className="text-3xl font-black text-white">₺149</span>
                                     <span className="text-slate-500">/ay</span>
                                 </div>
                                 <button

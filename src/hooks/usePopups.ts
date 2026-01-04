@@ -1,10 +1,19 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 
+export interface AdvancedSettings {
+    triggerType: 'time' | 'scroll' | 'exit_intent' | 'click';
+    delaySeconds: number;
+    scrollPercentage: number;
+    frequency: 'always' | 'once_per_session' | 'once_per_day' | 'once_per_week';
+    showOnMobile: boolean;
+    showOnDesktop: boolean;
+}
+
 export interface Popup {
     id: string;
     name: string;
-    type: 'exit_intent' | 'scroll' | 'time_based' | 'custom';
+    type: 'exit_intent' | 'scroll' | 'time_based' | 'custom' | 'standard' | 'urgency' | 'gift' | 'spinwheel' | 'time';
     headline: string;
     subtext: string;
     cta_text: string;
@@ -13,6 +22,7 @@ export interface Popup {
     created_at: string;
     impressions?: number;
     clicks?: number;
+    settings?: AdvancedSettings | null;
 }
 
 export function usePopups(userId: string | null) {
@@ -31,20 +41,20 @@ export function usePopups(userId: string | null) {
     const fetchPopups = async () => {
         try {
             setLoading(true);
-            // Select only columns that definitely exist
+            // Select all relevant columns including position
             const { data, error } = await supabase
                 .from('popups')
-                .select('id, user_id, name, type, headline, subtext, cta_text, is_active, created_at, impressions, clicks')
+                .select('id, user_id, name, type, headline, subtext, cta_text, position, is_active, created_at, impressions, clicks, settings')
                 .eq('user_id', userId)
                 .order('created_at', { ascending: false });
 
             if (error) {
-                // If there's a column error, try minimal columns
+                // If there's a column error, try without some columns
                 if (error.code === 'PGRST204' || error.code === '42703') {
                     console.warn('Some columns missing, trying minimal fetch...');
                     const { data: minData, error: minError } = await supabase
                         .from('popups')
-                        .select('id, user_id, name, type, headline, subtext, cta_text, is_active, created_at')
+                        .select('id, user_id, name, type, headline, subtext, cta_text, position, is_active, created_at')
                         .eq('user_id', userId)
                         .order('created_at', { ascending: false });
 
@@ -54,7 +64,8 @@ export function usePopups(userId: string | null) {
                         ...p,
                         impressions: 0,
                         clicks: 0,
-                        position: 'center'
+                        position: (p as any).position || 'center',
+                        settings: null
                     }));
                     setPopups(enrichedData as Popup[]);
                     return;
@@ -65,7 +76,8 @@ export function usePopups(userId: string | null) {
             // Add default position for popups that don't have it
             const enrichedData = (data || []).map(p => ({
                 ...p,
-                position: (p as any).position || 'center'
+                position: (p as any).position || 'center',
+                settings: (p as any).settings || null
             }));
             setPopups(enrichedData as Popup[]);
         } catch (error) {
@@ -75,48 +87,72 @@ export function usePopups(userId: string | null) {
         }
     };
 
-    const createPopup = async (name: string, headline: string, subtext: string, cta_text: string, position: 'center' | 'top_right' | 'top_left' | 'bottom_right' | 'bottom_left' | 'top_center' | 'bottom_center' = 'center', type: any = 'exit_intent') => {
+    const createPopup = async (name: string, headline: string, subtext: string, cta_text: string, position: 'center' | 'top_right' | 'top_left' | 'bottom_right' | 'bottom_left' | 'top_center' | 'bottom_center' = 'center', type: any = 'exit_intent', settings?: AdvancedSettings) => {
         try {
             if (!userId) throw new Error('User not found');
 
-            // Start with basic data without position (most compatible)
-            const basicData: any = {
+            // Map template type to trigger type for the pixel script
+            let triggerType = 'time_based';
+            if (settings?.triggerType) {
+                triggerType = settings.triggerType;
+            } else if (type === 'exit_intent') {
+                triggerType = 'exit_intent';
+            } else if (type === 'scroll') {
+                triggerType = 'scroll';
+            }
+
+            // Prepare popup data with position and settings
+            const popupData: any = {
                 user_id: userId,
                 name,
-                type,
+                type: triggerType, // Use trigger type for DB
                 headline,
                 subtext,
                 cta_text,
-                is_active: true
+                position, // Include position!
+                is_active: true,
+                delay_seconds: settings?.delaySeconds || 5,
+                scroll_percent: settings?.scrollPercentage || 50,
+                settings: settings ? JSON.stringify(settings) : null // Store full settings as JSON
             };
 
-            // First try without position column (works with older DB schemas)
+            // Try to insert with all fields
             let { data, error } = await supabase
                 .from('popups')
-                .insert([basicData])
+                .insert([popupData])
                 .select()
                 .single();
 
-            // If successful with basic data, add position locally for UI
-            if (!error && data) {
-                data.position = position;
-            }
-
-            // Fallback: If type constraint fails (old DB version), default to 'exit_intent'
-            if (error && error.code === '23514') { // Check constraint violation
-                console.warn('Type constraint violation, defaulting to exit_intent...');
+            // If position column doesn't exist, try without it
+            if (error && (error.code === '42703' || error.message?.includes('position'))) {
+                console.warn('Position column not found, trying without...');
+                const { position: _, ...dataWithoutPosition } = popupData;
                 const retry = await supabase
                     .from('popups')
-                    .insert([{ ...basicData, type: 'exit_intent' }])
+                    .insert([dataWithoutPosition])
                     .select()
                     .single();
                 data = retry.data;
                 error = retry.error;
+
+                // Add position locally for UI
                 if (!error && data) {
                     data.position = position;
                 }
             }
 
+            // If settings column doesn't exist, try without it
+            if (error && (error.code === '42703' || error.message?.includes('settings'))) {
+                console.warn('Settings column not found, trying without...');
+                const { settings: _, ...dataWithoutSettings } = popupData;
+                const retry = await supabase
+                    .from('popups')
+                    .insert([dataWithoutSettings])
+                    .select()
+                    .single();
+                data = retry.data;
+                error = retry.error;
+            }
 
             if (error) {
                 console.error('Supabase Error Details:', {
@@ -126,6 +162,12 @@ export function usePopups(userId: string | null) {
                     code: error.code
                 });
                 throw error;
+            }
+
+            // Ensure position is set in the returned data
+            if (data) {
+                data.position = data.position || position;
+                data.settings = settings;
             }
 
             setPopups([data, ...popups]);

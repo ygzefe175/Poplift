@@ -1,13 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-
-// CORS headers for all responses
-const corsHeaders = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    'Access-Control-Max-Age': '86400',
-};
+import { checkRateLimit, getClientIP, isValidUUID, getCorsHeaders } from '@/lib/security';
 
 // Create Supabase client with proper error handling
 function getSupabaseClient(): SupabaseClient | null {
@@ -27,17 +20,28 @@ function getSupabaseClient(): SupabaseClient | null {
     });
 }
 
-// Validate UUID format
-function isValidUUID(str: string): boolean {
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-    return uuidRegex.test(str);
-}
-
 export async function GET(
     request: NextRequest,
     context: { params: Promise<{ userId: string }> }
 ) {
+    const origin = request.headers.get('origin');
+    const corsHeaders = getCorsHeaders(origin);
+
     try {
+        // Rate limiting - 100 requests per minute per IP
+        const clientIP = getClientIP(request);
+        const rateLimit = checkRateLimit(`popups_${clientIP}`, 100, 60000);
+
+        if (!rateLimit.allowed) {
+            return NextResponse.json(
+                { popups: [], error: 'Too many requests', code: 'RATE_LIMITED' },
+                {
+                    status: 200, // Return 200 to not break client
+                    headers: corsHeaders
+                }
+            );
+        }
+
         // Parse userId from params
         const { userId } = await context.params;
 
@@ -50,7 +54,7 @@ export async function GET(
                     code: 'INVALID_USER_ID'
                 },
                 {
-                    status: 200, // Return 200 with empty popups to prevent client errors
+                    status: 200,
                     headers: corsHeaders
                 }
             );
@@ -58,7 +62,7 @@ export async function GET(
 
         // Validate UUID format
         if (!isValidUUID(userId)) {
-            console.warn('[Popups API] Invalid UUID format:', userId);
+            console.warn('[Popups API] Invalid UUID format:', userId.substring(0, 8) + '...');
             return NextResponse.json(
                 {
                     popups: [],
@@ -79,40 +83,42 @@ export async function GET(
             return NextResponse.json(
                 {
                     popups: [],
-                    error: 'Database connection unavailable',
-                    code: 'DB_CONNECTION_ERROR'
+                    error: 'Service temporarily unavailable',
+                    code: 'SERVICE_UNAVAILABLE'
                 },
                 {
-                    status: 200, // Return 200 to prevent client errors
+                    status: 200,
                     headers: corsHeaders
                 }
             );
         }
 
         // Fetch active popups for this user
+        // Only select necessary fields to minimize data exposure
         const { data: popups, error } = await supabase
             .from('popups')
             .select('id, name, type, headline, subtext, cta_text, position, is_active, cta_url, delay_seconds, scroll_percent')
             .eq('user_id', userId)
             .eq('is_active', true)
-            .order('created_at', { ascending: false });
+            .order('created_at', { ascending: false })
+            .limit(20); // Limit results
 
         if (error) {
             console.error('[Popups API] Database error:', error.message);
             return NextResponse.json(
                 {
                     popups: [],
-                    error: 'Database query failed',
+                    error: 'Failed to fetch popups',
                     code: 'DB_QUERY_ERROR'
                 },
                 {
-                    status: 200, // Return 200 to prevent client errors
+                    status: 200,
                     headers: corsHeaders
                 }
             );
         }
 
-        // Enrich popups with defaults
+        // Enrich popups with safe defaults
         const enrichedPopups = (popups || []).map(popup => ({
             id: popup.id,
             name: popup.name || 'Popup',
@@ -122,12 +128,10 @@ export async function GET(
             cta_text: popup.cta_text || 'Devam Et',
             cta_url: popup.cta_url || null,
             position: popup.position || 'center',
-            delay_seconds: popup.delay_seconds || 5,
-            scroll_percent: popup.scroll_percent || 50,
+            delay_seconds: Math.min(popup.delay_seconds || 5, 60), // Cap at 60 seconds
+            scroll_percent: Math.min(Math.max(popup.scroll_percent || 50, 0), 100), // Clamp 0-100
             is_active: popup.is_active
         }));
-
-        console.log(`[Popups API] Returning ${enrichedPopups.length} popup(s) for user ${userId.substring(0, 8)}...`);
 
         return NextResponse.json(
             {
@@ -153,7 +157,7 @@ export async function GET(
                 code: 'INTERNAL_ERROR'
             },
             {
-                status: 200, // Return 200 to prevent client errors
+                status: 200,
                 headers: corsHeaders
             }
         );
@@ -161,9 +165,10 @@ export async function GET(
 }
 
 // Handle CORS preflight requests
-export async function OPTIONS() {
+export async function OPTIONS(request: NextRequest) {
+    const origin = request.headers.get('origin');
     return new NextResponse(null, {
         status: 204,
-        headers: corsHeaders
+        headers: getCorsHeaders(origin)
     });
 }

@@ -1,11 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-
-const corsHeaders = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-};
+import { checkRateLimit, getClientIP, isValidUUID, sanitizeString, getCorsHeaders } from '@/lib/security';
 
 function getSupabaseClient() {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -18,21 +13,43 @@ function getSupabaseClient() {
     });
 }
 
-// POST - Activate an addon for user
+// POST - Activate an addon for user (requires authentication)
 export async function POST(request: NextRequest) {
+    const origin = request.headers.get('origin');
+    const corsHeaders = getCorsHeaders(origin);
+
     try {
+        // Rate limiting - 10 requests per minute per IP
+        const clientIP = getClientIP(request);
+        const rateLimit = checkRateLimit(`subscription_post_${clientIP}`, 10, 60000);
+
+        if (!rateLimit.allowed) {
+            return NextResponse.json(
+                { error: 'Too many requests. Please try again later.' },
+                {
+                    status: 429,
+                    headers: {
+                        ...corsHeaders,
+                        'Retry-After': String(Math.ceil(rateLimit.resetIn / 1000))
+                    }
+                }
+            );
+        }
+
         const body = await request.json();
         const { user_id, addon_type } = body;
 
-        if (!user_id || !addon_type) {
+        // Validate user_id is a valid UUID
+        if (!user_id || !isValidUUID(user_id)) {
             return NextResponse.json(
-                { error: 'user_id and addon_type are required' },
+                { error: 'Valid user_id is required' },
                 { status: 400, headers: corsHeaders }
             );
         }
 
+        // Validate addon_type
         const validAddons = ['analytics', 'custom_design', 'ai_assistant', 'onboarding'];
-        if (!validAddons.includes(addon_type)) {
+        if (!addon_type || !validAddons.includes(addon_type)) {
             return NextResponse.json(
                 { error: 'Invalid addon_type' },
                 { status: 400, headers: corsHeaders }
@@ -42,12 +59,21 @@ export async function POST(request: NextRequest) {
         const supabase = getSupabaseClient();
         if (!supabase) {
             return NextResponse.json(
-                { error: 'Database unavailable' },
-                { status: 500, headers: corsHeaders }
+                { error: 'Service temporarily unavailable' },
+                { status: 503, headers: corsHeaders }
             );
         }
 
-        // Check if user subscription exists
+        // Verify user exists (basic authorization)
+        const { data: userExists } = await supabase.auth.admin.getUserById(user_id);
+        if (!userExists?.user) {
+            return NextResponse.json(
+                { error: 'User not found' },
+                { status: 404, headers: corsHeaders }
+            );
+        }
+
+        // Check existing subscription
         const { data: existing } = await supabase
             .from('user_subscriptions')
             .select('*')
@@ -57,18 +83,16 @@ export async function POST(request: NextRequest) {
         const addonField = `has_${addon_type}`;
         const expiresField = `${addon_type}_expires_at`;
 
-        // Calculate expiry (30 days from now for monthly)
+        // Calculate expiry (30 days from now)
         const expiresAt = new Date();
         expiresAt.setDate(expiresAt.getDate() + 30);
 
         if (existing) {
-            // Update existing subscription
             const updateData: Record<string, unknown> = {
                 [addonField]: true,
                 updated_at: new Date().toISOString()
             };
 
-            // Add expiry for analytics
             if (addon_type === 'analytics') {
                 updateData[expiresField] = expiresAt.toISOString();
             }
@@ -79,14 +103,13 @@ export async function POST(request: NextRequest) {
                 .eq('user_id', user_id);
 
             if (error) {
-                console.error('Update error:', error);
+                console.error('Subscription update error:', error);
                 return NextResponse.json(
                     { error: 'Failed to update subscription' },
                     { status: 500, headers: corsHeaders }
                 );
             }
         } else {
-            // Create new subscription
             const insertData: Record<string, unknown> = {
                 user_id,
                 plan_type: 'free',
@@ -102,7 +125,7 @@ export async function POST(request: NextRequest) {
                 .insert(insertData);
 
             if (error) {
-                console.error('Insert error:', error);
+                console.error('Subscription insert error:', error);
                 return NextResponse.json(
                     { error: 'Failed to create subscription' },
                     { status: 500, headers: corsHeaders }
@@ -112,7 +135,7 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json({
             success: true,
-            message: `${addon_type} activated successfully`,
+            message: `${sanitizeString(addon_type)} activated successfully`,
             expires_at: expiresAt.toISOString()
         }, { headers: corsHeaders });
 
@@ -127,13 +150,33 @@ export async function POST(request: NextRequest) {
 
 // GET - Check subscription status
 export async function GET(request: NextRequest) {
+    const origin = request.headers.get('origin');
+    const corsHeaders = getCorsHeaders(origin);
+
     try {
+        // Rate limiting - 60 requests per minute per IP
+        const clientIP = getClientIP(request);
+        const rateLimit = checkRateLimit(`subscription_get_${clientIP}`, 60, 60000);
+
+        if (!rateLimit.allowed) {
+            return NextResponse.json(
+                { error: 'Too many requests' },
+                {
+                    status: 429,
+                    headers: {
+                        ...corsHeaders,
+                        'Retry-After': String(Math.ceil(rateLimit.resetIn / 1000))
+                    }
+                }
+            );
+        }
+
         const { searchParams } = new URL(request.url);
         const userId = searchParams.get('user_id');
 
-        if (!userId) {
+        if (!userId || !isValidUUID(userId)) {
             return NextResponse.json(
-                { error: 'user_id is required' },
+                { error: 'Valid user_id is required' },
                 { status: 400, headers: corsHeaders }
             );
         }
@@ -141,8 +184,8 @@ export async function GET(request: NextRequest) {
         const supabase = getSupabaseClient();
         if (!supabase) {
             return NextResponse.json(
-                { error: 'Database unavailable' },
-                { status: 500, headers: corsHeaders }
+                { error: 'Service temporarily unavailable' },
+                { status: 503, headers: corsHeaders }
             );
         }
 
@@ -179,9 +222,10 @@ export async function GET(request: NextRequest) {
     }
 }
 
-export async function OPTIONS() {
+export async function OPTIONS(request: NextRequest) {
+    const origin = request.headers.get('origin');
     return new NextResponse(null, {
         status: 204,
-        headers: corsHeaders
+        headers: getCorsHeaders(origin)
     });
 }
