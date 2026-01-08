@@ -66,6 +66,21 @@ const PRODUCTS = {
             'Cihaz ve tarayıcı dağılımı',
             'Dönüşüm hunisi analizi'
         ]
+    },
+    money_coach: {
+        name: 'Para Koçu Premium',
+        description: 'Paranı kontrol altına al',
+        price: 99.99,
+        icon: BarChart3,
+        color: 'from-purple-500 to-indigo-600',
+        addonType: 'money_coach',
+        features: [
+            'Sınırsız finansal hesaplama',
+            'Tasarruf simülasyonları',
+            'Kişisel tasarruf önerileri',
+            'Geçmiş hesaplama karşılaştırması',
+            'Haftalık özet e-posta'
+        ]
     }
 };
 
@@ -118,15 +133,41 @@ function CheckoutContent() {
         setLoading(true);
 
         try {
-            // Simulate payment processing
+            // Get session token for authenticated API requests
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session?.access_token) {
+                alert('Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.');
+                router.push('/login');
+                return;
+            }
+
+            // ⚠️ IMPORTANT: This is a DEMO payment flow!
+            // In production, integrate a real payment provider like:
+            // - Stripe (stripe.com)
+            // - iyzico (iyzico.com) for Turkey
+            // - PayTR (paytr.com) for Turkey
+            // 
+            // The flow should be:
+            // 1. Create payment intent on server
+            // 2. Process payment with provider
+            // 3. Verify payment via webhook
+            // 4. Only then activate subscription
+            //
+            // Current demo: simulates successful payment for testing
+            console.warn('[DEMO MODE] Simulating payment - No real payment processed!');
             await new Promise(resolve => setTimeout(resolve, 2000));
+
+            const authHeaders = {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${session.access_token}`
+            };
 
             // Update subscription based on product type
             if ('addonType' in product && product.addonType) {
                 // It's an addon
                 const response = await fetch('/api/subscription', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: authHeaders,
                     body: JSON.stringify({
                         user_id: userId,
                         addon_type: product.addonType
@@ -134,22 +175,24 @@ function CheckoutContent() {
                 });
 
                 if (!response.ok) {
-                    throw new Error('Subscription update failed');
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Subscription update failed');
                 }
             } else if ('planType' in product && product.planType) {
-                // It's a plan upgrade - update plan_type in user_subscriptions
-                const { error } = await supabase
-                    .from('user_subscriptions')
-                    .upsert({
+                // It's a plan upgrade
+                const response = await fetch('/api/subscription/upgrade', {
+                    method: 'POST',
+                    headers: authHeaders,
+                    body: JSON.stringify({
                         user_id: userId,
-                        plan_type: product.planType,
-                        has_ai_assistant: true, // Pro includes AI
-                        updated_at: new Date().toISOString()
-                    }, { onConflict: 'user_id' });
+                        plan_type: product.planType
+                    })
+                });
 
-                if (error) {
-                    console.error('Plan update error:', error);
-                    throw error;
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    console.error('Plan update error:', errorData);
+                    throw new Error(errorData.error || 'Plan update failed');
                 }
             }
 

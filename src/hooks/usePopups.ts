@@ -74,11 +74,25 @@ export function usePopups(userId: string | null) {
             }
 
             // Add default position for popups that don't have it
-            const enrichedData = (data || []).map(p => ({
-                ...p,
-                position: (p as any).position || 'center',
-                settings: (p as any).settings || null
-            }));
+            // Parse settings if it's a JSON string
+            const enrichedData = (data || []).map(p => {
+                let parsedSettings = null;
+                try {
+                    if ((p as any).settings) {
+                        parsedSettings = typeof (p as any).settings === 'string'
+                            ? JSON.parse((p as any).settings)
+                            : (p as any).settings;
+                    }
+                } catch (e) {
+                    console.warn('Failed to parse settings for popup:', p.id, e);
+                    parsedSettings = null;
+                }
+                return {
+                    ...p,
+                    position: (p as any).position || 'center',
+                    settings: parsedSettings
+                };
+            });
             setPopups(enrichedData as Popup[]);
         } catch (error) {
             console.error('Error fetching popups:', error);

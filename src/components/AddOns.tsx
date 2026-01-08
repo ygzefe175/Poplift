@@ -5,16 +5,6 @@ import { Palette, BarChart3, Users, Sparkles, ShoppingCart } from 'lucide-react'
 export default function AddOns() {
     const addons = [
         {
-            id: "tasarim",
-            icon: <Palette size={24} className="text-purple-400" />,
-            name: "Özel Tasarım Paketi",
-            price: "₺499",
-            type: "tek seferlik",
-            typeLabel: "TEK SEFERLİK ÖDEME",
-            isOneTime: true,
-            desc: "Marka kimliğinize özel 5 kampanya tasarımı. Profesyonel tasarımcılar tarafından."
-        },
-        {
             id: "analytics",
             icon: <BarChart3 size={24} className="text-emerald-400" />,
             name: "Premium Analytics",
@@ -25,20 +15,10 @@ export default function AddOns() {
             desc: "Detaylı raporlar, funnel analizi, cohort takibi. Google Analytics entegrasyonu dahil."
         },
         {
-            id: "onboarding",
-            icon: <Users size={24} className="text-blue-400" />,
-            name: "Özel Onboarding",
-            price: "₺299",
-            type: "tek seferlik",
-            typeLabel: "TEK SEFERLİK ÖDEME",
-            isOneTime: true,
-            desc: "1 saatlik zoom call + ilk kampanyaları birlikte kuruyoruz. Garantili sonuç stratejisi."
-        },
-        {
             id: "ai",
             icon: <Sparkles size={24} className="text-yellow-400" />,
             name: "AI Metin Asistanı",
-            price: "₺149",
+            price: "₺99",
             type: "/ay",
             typeLabel: "AYLIK ABONELİK",
             isOneTime: false,
@@ -58,7 +38,7 @@ export default function AddOns() {
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
                     {addons.map((addon) => (
                         <div
                             key={addon.id}

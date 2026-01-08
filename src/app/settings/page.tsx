@@ -153,7 +153,7 @@ export default function SettingsPage() {
 
     const getPlanPrice = (plan: string) => {
         switch (plan) {
-            case 'pro': return '₺399/ay';
+            case 'pro': return '₺599/ay';
             case 'growth': return '₺699/ay';
             default: return 'Ücretsiz';
         }
@@ -189,8 +189,8 @@ export default function SettingsPage() {
                         <button
                             onClick={() => setActiveTab('profile')}
                             className={`w-full text-left px-4 py-3 rounded-xl font-bold flex items-center gap-3 transition-all ${activeTab === 'profile'
-                                    ? 'bg-brand-orange/10 text-brand-orange border border-brand-orange/20'
-                                    : 'hover:bg-white/5 text-slate-400'
+                                ? 'bg-brand-orange/10 text-brand-orange border border-brand-orange/20'
+                                : 'hover:bg-white/5 text-slate-400'
                                 }`}
                         >
                             <User size={18} /> Profil
@@ -198,8 +198,8 @@ export default function SettingsPage() {
                         <button
                             onClick={() => setActiveTab('subscription')}
                             className={`w-full text-left px-4 py-3 rounded-xl font-bold flex items-center gap-3 transition-all ${activeTab === 'subscription'
-                                    ? 'bg-brand-orange/10 text-brand-orange border border-brand-orange/20'
-                                    : 'hover:bg-white/5 text-slate-400'
+                                ? 'bg-brand-orange/10 text-brand-orange border border-brand-orange/20'
+                                : 'hover:bg-white/5 text-slate-400'
                                 }`}
                         >
                             <CreditCard size={18} /> Abonelik
@@ -439,54 +439,6 @@ export default function SettingsPage() {
                                                 ) : (
                                                     <Link href="/checkout?product=analytics" className="px-3 py-1.5 bg-white/10 border border-white/20 text-white font-bold rounded-lg hover:bg-white/20 transition-all text-xs">
                                                         Ekle
-                                                    </Link>
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        {/* Custom Design */}
-                                        <div className={`p-4 rounded-xl border ${subscription?.has_custom_design ? 'bg-purple-500/5 border-purple-500/20' : 'bg-white/5 border-white/10'}`}>
-                                            <div className="flex items-center justify-between">
-                                                <div className="flex items-center gap-3">
-                                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${subscription?.has_custom_design ? 'bg-purple-500/20' : 'bg-white/5'}`}>
-                                                        <Palette size={20} className={subscription?.has_custom_design ? 'text-purple-400' : 'text-slate-500'} />
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-white font-bold">Özel Tasarım Paketi</p>
-                                                        <p className="text-slate-500 text-sm">₺499 tek seferlik</p>
-                                                    </div>
-                                                </div>
-                                                {subscription?.has_custom_design ? (
-                                                    <span className="px-3 py-1.5 bg-emerald-500/20 text-emerald-400 font-bold rounded-lg text-xs">
-                                                        ✓ Satın Alındı
-                                                    </span>
-                                                ) : (
-                                                    <Link href="/checkout?product=design" className="px-3 py-1.5 bg-white/10 border border-white/20 text-white font-bold rounded-lg hover:bg-white/20 transition-all text-xs">
-                                                        Satın Al
-                                                    </Link>
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        {/* Onboarding */}
-                                        <div className={`p-4 rounded-xl border ${subscription?.has_onboarding ? 'bg-blue-500/5 border-blue-500/20' : 'bg-white/5 border-white/10'}`}>
-                                            <div className="flex items-center justify-between">
-                                                <div className="flex items-center gap-3">
-                                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${subscription?.has_onboarding ? 'bg-blue-500/20' : 'bg-white/5'}`}>
-                                                        <Users size={20} className={subscription?.has_onboarding ? 'text-blue-400' : 'text-slate-500'} />
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-white font-bold">Özel Onboarding</p>
-                                                        <p className="text-slate-500 text-sm">₺299 tek seferlik</p>
-                                                    </div>
-                                                </div>
-                                                {subscription?.has_onboarding ? (
-                                                    <span className="px-3 py-1.5 bg-emerald-500/20 text-emerald-400 font-bold rounded-lg text-xs">
-                                                        ✓ Satın Alındı
-                                                    </span>
-                                                ) : (
-                                                    <Link href="/checkout?product=onboarding" className="px-3 py-1.5 bg-white/10 border border-white/20 text-white font-bold rounded-lg hover:bg-white/20 transition-all text-xs">
-                                                        Satın Al
                                                     </Link>
                                                 )}
                                             </div>

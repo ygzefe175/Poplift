@@ -102,6 +102,9 @@ export default function CreateCampaignModal({ isOpen, onClose, onSubmit }: Creat
     const [hasProAccess, setHasProAccess] = useState(false);
     const [isLoadingSubscription, setIsLoadingSubscription] = useState(true);
 
+    // Spinwheel upgrade paywall state
+    const [showSpinwheelPaywall, setShowSpinwheelPaywall] = useState(false);
+
     // Fetch user subscription on mount
     useEffect(() => {
         const fetchSubscription = async () => {
@@ -265,9 +268,6 @@ export default function CreateCampaignModal({ isOpen, onClose, onSubmit }: Creat
         }, 1500);
     };
 
-    // Spinwheel upgrade paywall state
-    const [showSpinwheelPaywall, setShowSpinwheelPaywall] = useState(false);
-
     const handleTemplateSelect = (templateId: string) => {
         if (templateId === 'spinwheel' && !hasProAccess) {
             // Show upgrade prompt for spinwheel
@@ -322,7 +322,7 @@ export default function CreateCampaignModal({ isOpen, onClose, onSubmit }: Creat
                                             <span className="px-1.5 py-0.5 bg-brand-orange text-black text-[10px] font-black rounded">PRO</span>
                                             Pro Paket
                                         </span>
-                                        <span className="text-brand-orange font-black">₺399/ay</span>
+                                        <span className="text-brand-orange font-black">₺599/ay</span>
                                     </div>
                                     <p className="text-xs text-emerald-400">✓ Magic Fill dahil + Çarkıfelek + Tüm Özellikler</p>
                                 </div>
@@ -363,7 +363,7 @@ export default function CreateCampaignModal({ isOpen, onClose, onSubmit }: Creat
                                             <span className="px-1.5 py-0.5 bg-brand-orange text-black text-[10px] font-black rounded">PRO</span>
                                             Pro Paket
                                         </span>
-                                        <span className="text-brand-orange font-black">₺399/ay</span>
+                                        <span className="text-brand-orange font-black">₺599/ay</span>
                                     </div>
                                     <ul className="text-xs text-slate-400 space-y-1">
                                         <li className="flex items-center gap-2">

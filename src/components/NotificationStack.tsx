@@ -146,7 +146,7 @@ export default function NotificationStack() {
         notifications.map(n => n.id)
     );
     const [showPreference, setShowPreference] = useState(false);
-    const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+    const [notificationsEnabled, setNotificationsEnabled] = useState(false);
     const [isClient, setIsClient] = useState(false);
 
     useEffect(() => {
@@ -156,13 +156,15 @@ export default function NotificationStack() {
         try {
             if (typeof window !== 'undefined' && window.localStorage) {
                 const stored = localStorage.getItem('poplift_notifications_preference');
-                if (stored === 'disabled') {
+                if (stored === 'enabled') {
+                    setNotificationsEnabled(true);
+                } else if (stored === 'disabled') {
                     setNotificationsEnabled(false);
                 } else if (stored === null) {
-                    // First visit or no preference set - show preference modal after 5 seconds
+                    // First visit or no preference set - show preference modal quickly
                     const timer = setTimeout(() => {
                         setShowPreference(true);
-                    }, 5000);
+                    }, 1000);
                     return () => clearTimeout(timer);
                 }
             }

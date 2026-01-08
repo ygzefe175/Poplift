@@ -12,7 +12,9 @@ import CampaignList from '@/components/CampaignList';
 import ScriptInstaller from '@/components/ScriptInstaller';
 import { usePopups } from '@/hooks/usePopups';
 import OnboardingChecklist from '@/components/OnboardingChecklist';
-import { Zap, MousePointerClick, ArrowUp, TrendingUp, Users, Target, Mail, RefreshCw } from 'lucide-react';
+import MoneyCoachWidget from '@/components/widgets/MoneyCoachWidget';
+import DailyCheckInWidget from '@/components/widgets/DailyCheckInWidget';
+import { Zap, MousePointerClick, ArrowUp, TrendingUp, Users, Target, Mail, RefreshCw, Wallet } from 'lucide-react';
 
 export default function DashboardPage() {
     const { user, loading, signOut, emailConfirmed } = useAuth();
@@ -175,6 +177,11 @@ export default function DashboardPage() {
                     </div>
                 </div>
 
+                {/* Daily Check-in Section - Retention Booster */}
+                <div className="mb-8">
+                    <DailyCheckInWidget />
+                </div>
+
                 {/* Onboarding Checklist */}
                 <OnboardingChecklist
                     hasCampaigns={popups.length > 0}
@@ -189,10 +196,69 @@ export default function DashboardPage() {
                     />
                 )}
 
+                {/* Para Koçu Widget & Quick Actions */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                    {/* Para Koçu Widget */}
+                    <div className="md:col-span-1">
+                        <MoneyCoachWidget isPremium={userPlan !== 'free'} />
+                    </div>
+
+                    {/* Quick Stats */}
+                    <div className="md:col-span-2 grid grid-cols-2 gap-4">
+                        {/* Active Campaigns */}
+                        <div className="bg-[#1C1C1E] rounded-2xl p-5 border border-white/5">
+                            <div className="flex items-center gap-2 mb-3">
+                                <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+                                    <Target size={16} className="text-emerald-400" />
+                                </div>
+                                <span className="text-xs text-slate-500 uppercase font-bold">Aktif Kampanya</span>
+                            </div>
+                            <p className="text-3xl font-black text-white">{activePopupsCount}</p>
+                            <p className="text-xs text-slate-500 mt-1">toplam {popups.length} kampanya</p>
+                        </div>
+
+                        {/* This Month Revenue */}
+                        <div className="bg-[#1C1C1E] rounded-2xl p-5 border border-white/5">
+                            <div className="flex items-center gap-2 mb-3">
+                                <div className="w-8 h-8 rounded-lg bg-brand-orange/20 flex items-center justify-center">
+                                    <Zap size={16} className="text-brand-orange" />
+                                </div>
+                                <span className="text-xs text-slate-500 uppercase font-bold">Kurtarılan Değer</span>
+                            </div>
+                            <p className="text-3xl font-black text-white">₺{(totalClicks * 125).toLocaleString()}</p>
+                            <p className="text-xs text-emerald-400 mt-1">+12% bu ay</p>
+                        </div>
+
+                        {/* Conversion Rate */}
+                        <div className="bg-[#1C1C1E] rounded-2xl p-5 border border-white/5">
+                            <div className="flex items-center gap-2 mb-3">
+                                <div className="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center">
+                                    <TrendingUp size={16} className="text-purple-400" />
+                                </div>
+                                <span className="text-xs text-slate-500 uppercase font-bold">Dönüşüm</span>
+                            </div>
+                            <p className="text-3xl font-black text-white">%{conversionRate}</p>
+                            <p className="text-xs text-slate-500 mt-1">sektör ort. üzerinde</p>
+                        </div>
+
+                        {/* Impressions */}
+                        <div className="bg-[#1C1C1E] rounded-2xl p-5 border border-white/5">
+                            <div className="flex items-center gap-2 mb-3">
+                                <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                                    <Users size={16} className="text-blue-400" />
+                                </div>
+                                <span className="text-xs text-slate-500 uppercase font-bold">Gösterim</span>
+                            </div>
+                            <p className="text-3xl font-black text-white">{totalImpressions.toLocaleString()}</p>
+                            <p className="text-xs text-slate-500 mt-1">bu ay</p>
+                        </div>
+                    </div>
+                </div>
+
                 {/* Stats Cards - Group 1: Detailed Popup Stats */}
                 <div className="mb-4 flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                        <h2 className="text-xl font-bold text-white tracking-tight">Performans Özeti</h2>
+                        <h2 className="text-xl font-bold text-white tracking-tight">Detaylı Performans</h2>
                         <span className="text-[10px] font-bold text-slate-500 uppercase border border-white/10 px-2 py-0.5 rounded">Pop-up Paketi</span>
                     </div>
                 </div>

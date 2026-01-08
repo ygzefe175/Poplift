@@ -6,7 +6,6 @@ import NotificationStack from '@/components/NotificationStack';
 import Testimonials from '@/components/Testimonials';
 import ProblemSolution from '@/components/ProblemSolution';
 import ROICalculator from '@/components/ROICalculator';
-import LiveStats from '@/components/LiveStats';
 import ComparisonTable from '@/components/ComparisonTable';
 import FAQ from '@/components/FAQ';
 import FAQSection from '@/components/FAQSection';
@@ -16,14 +15,16 @@ import HowItWorks from '@/components/HowItWorks';
 import Features from '@/components/Features';
 import Pricing from '@/components/Pricing';
 import TemplateShowcase from '@/components/TemplateShowcase';
-import { ArrowRight, Check, Zap, MousePointer2, Sparkles, Building2, ShieldCheck, Mail, Target, Rocket, Clock } from 'lucide-react';
+import LiveSocialProof from '@/components/LiveSocialProof';
+import InteractiveDemo from '@/components/InteractiveDemo';
+import { ArrowRight, Check, Zap, MousePointer2, Sparkles, Building2, ShieldCheck, Mail, Target, Rocket, Clock, Lock } from 'lucide-react';
 
 export default function Home() {
   return (
     <main className="min-h-screen font-sans overflow-x-hidden selection:bg-brand-orange/30">
       <Navbar />
       <NotificationStack />
-      <LiveStats />
+      <LiveSocialProof />
 
       {/* 1️⃣ HERO SECTION (EN KRİTİK) */}
       <section className="relative pt-32 pb-16 px-6 overflow-hidden">
@@ -316,9 +317,9 @@ export default function Home() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { n: "Elif Kara", r: "E-Ticaret Sahibi · elifyagi.com", q: "İlk hafta sepet terkleri %18 düştü. Reklam harcamam aynı ama gelir arttı. Poplift kurulumu 5 dakika sürdü, sonuçlar ilk gün başladı.", s: "₺12.000/ay ek gelir" },
-              { n: "Burak Yılmaz", r: "Dijital Ajans Kurucusu", q: "Müşterilerimize kuruyoruz. Özellikle e-ticarette çok işe yarıyor. Exit-intent sadece exit değil, doğru zamanlama yapıyor.", s: "%31 dönüşüm artışı" },
-              { n: "Zeynep Aydın", r: "Online Eğitim Platformu", q: "Mail listesi büyütmek için kullanıyoruz. Hazır şablonlar kullanışlı, özelleştirme de kolay. İlk ayda 2.100 yeni abone.", s: "+2.100 abone" }
+              { n: "Elif K.", r: "E-Ticaret Sahibi", q: "İlk hafta sepet terkleri %18 düştü. Reklam harcamam aynı ama gelir arttı. Poplift kurulumu 5 dakika sürdü, sonuçlar ilk gün başladı.", s: "₺12.000/ay ek gelir" },
+              { n: "Burak Y.", r: "Dijital Ajans Kurucusu", q: "Müşterilerimize kuruyoruz. Özellikle e-ticarette çok işe yarıyor. Exit-intent sadece exit değil, doğru zamanlama yapıyor.", s: "%31 dönüşüm artışı" },
+              { n: "Zeynep A.", r: "Online Eğitim Platformu", q: "Mail listesi büyütmek için kullanıyoruz. Hazır şablonlar kullanışlı, özelleştirme de kolay. İlk ayda 2.100 yeni abone.", s: "+2.100 abone" }
             ].map((t, i) => (
               <div key={i} className="bg-[#0A0B14] p-8 rounded-2xl border border-white/5 relative">
                 <div className="text-brand-orange font-black text-4xl absolute top-4 right-8 opacity-20">"</div>
@@ -421,6 +422,33 @@ export default function Home() {
           {/* TRUST BADGES */}
           <div className="mt-8">
             <TrustBadges />
+          </div>
+        </div>
+      </section>
+
+      {/* 🎮 ETKİLEŞİMLİ DEMO */}
+      <InteractiveDemo />
+
+      {/* 🔐 GİZLİLİK VE GÜVEN */}
+      <section className="py-16 px-6 bg-white/[0.02] border-y border-white/5">
+        <div className="max-w-4xl mx-auto text-center">
+          <div className="flex items-center justify-center gap-3 mb-6">
+            <Lock size={24} className="text-emerald-400" />
+            <h3 className="text-xl font-bold text-white">Gizlilik ve Güven Taahhüdü</h3>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
+            <div className="p-4 bg-white/5 rounded-xl border border-white/10">
+              <span className="text-emerald-400">✓</span>
+              <p className="text-slate-400 mt-2">Kullanıcı verileri şifrelenerek saklanır, üçüncü kişilerle paylaşılmaz.</p>
+            </div>
+            <div className="p-4 bg-white/5 rounded-xl border border-white/10">
+              <span className="text-emerald-400">✓</span>
+              <p className="text-slate-400 mt-2">KVKK ve GDPR uyumlu altyapı. Verileriniz Türkiye'de güvende.</p>
+            </div>
+            <div className="p-4 bg-white/5 rounded-xl border border-white/10">
+              <span className="text-emerald-400">✓</span>
+              <p className="text-slate-400 mt-2">İstediğiniz zaman hesabınızı ve tüm verilerinizi silebilirsiniz.</p>
+            </div>
           </div>
         </div>
       </section>

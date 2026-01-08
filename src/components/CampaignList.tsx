@@ -146,7 +146,7 @@ export default function CampaignList({ popups, loading, createPopup, deletePopup
 
                             <div className="flex items-center gap-2 mb-4">
                                 <p className="text-xs text-slate-500 font-mono">
-                                    {format(new Date(popup.created_at), 'd MMMM yyyy, HH:mm', { locale: tr })}
+                                    {popup.created_at ? format(new Date(popup.created_at), 'd MMMM yyyy, HH:mm', { locale: tr }) : 'Tarih yok'}
                                 </p>
                                 {/* Template Badge */}
                                 {popup.type === 'spinwheel' && (
@@ -162,29 +162,31 @@ export default function CampaignList({ popups, loading, createPopup, deletePopup
                             </div>
 
                             {/* Settings Preview */}
-                            {popup.settings && (
+                            {popup.settings && typeof popup.settings === 'object' && (
                                 <div className="flex flex-wrap gap-1.5 mt-3">
-                                    {popup.settings.triggerType === 'time' && (
+                                    {popup.settings?.triggerType === 'time' && (
                                         <span className="flex items-center gap-1 px-2 py-1 bg-white/5 rounded-lg text-[9px] text-slate-400 font-medium">
-                                            <Clock size={10} /> {popup.settings.delaySeconds}sn
+                                            <Clock size={10} /> {popup.settings?.delaySeconds ?? 5}sn
                                         </span>
                                     )}
-                                    {popup.settings.triggerType === 'scroll' && (
+                                    {popup.settings?.triggerType === 'scroll' && (
                                         <span className="flex items-center gap-1 px-2 py-1 bg-white/5 rounded-lg text-[9px] text-slate-400 font-medium">
-                                            <Scroll size={10} /> %{popup.settings.scrollPercentage}
+                                            <Scroll size={10} /> %{popup.settings?.scrollPercentage ?? 50}
                                         </span>
                                     )}
-                                    {popup.settings.triggerType === 'exit_intent' && (
+                                    {popup.settings?.triggerType === 'exit_intent' && (
                                         <span className="flex items-center gap-1 px-2 py-1 bg-white/5 rounded-lg text-[9px] text-slate-400 font-medium">
                                             <Target size={10} /> Exit Intent
                                         </span>
                                     )}
-                                    <span className="px-2 py-1 bg-white/5 rounded-lg text-[9px] text-slate-400 font-medium">
-                                        {popup.settings.frequency === 'always' && 'Her Ziyaret'}
-                                        {popup.settings.frequency === 'once_per_session' && '1x/Oturum'}
-                                        {popup.settings.frequency === 'once_per_day' && '1x/Gün'}
-                                        {popup.settings.frequency === 'once_per_week' && '1x/Hafta'}
-                                    </span>
+                                    {popup.settings?.frequency && (
+                                        <span className="px-2 py-1 bg-white/5 rounded-lg text-[9px] text-slate-400 font-medium">
+                                            {popup.settings.frequency === 'always' && 'Her Ziyaret'}
+                                            {popup.settings.frequency === 'once_per_session' && '1x/Oturum'}
+                                            {popup.settings.frequency === 'once_per_day' && '1x/Gün'}
+                                            {popup.settings.frequency === 'once_per_week' && '1x/Hafta'}
+                                        </span>
+                                    )}
                                 </div>
                             )}
                         </div>

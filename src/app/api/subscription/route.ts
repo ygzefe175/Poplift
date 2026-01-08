@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Validate addon_type
-        const validAddons = ['analytics', 'custom_design', 'ai_assistant', 'onboarding'];
+        const validAddons = ['analytics', 'custom_design', 'ai_assistant', 'onboarding', 'money_coach'];
         if (!addon_type || !validAddons.includes(addon_type)) {
             return NextResponse.json(
                 { error: 'Invalid addon_type' },
@@ -64,12 +64,31 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Verify user exists (basic authorization)
-        const { data: userExists } = await supabase.auth.admin.getUserById(user_id);
-        if (!userExists?.user) {
+        // CRITICAL SECURITY FIX: Verify the request comes from authenticated user
+        const authHeader = request.headers.get('authorization');
+        if (!authHeader?.startsWith('Bearer ')) {
             return NextResponse.json(
-                { error: 'User not found' },
-                { status: 404, headers: corsHeaders }
+                { error: 'Authentication required' },
+                { status: 401, headers: corsHeaders }
+            );
+        }
+
+        const token = authHeader.split(' ')[1];
+        const { data: { user: authenticatedUser }, error: authError } = await supabase.auth.getUser(token);
+
+        if (authError || !authenticatedUser) {
+            return NextResponse.json(
+                { error: 'Invalid or expired session' },
+                { status: 401, headers: corsHeaders }
+            );
+        }
+
+        // CRITICAL: Verify user_id matches the authenticated user (IDOR prevention)
+        if (authenticatedUser.id !== user_id) {
+            console.warn(`[SECURITY] IDOR attempt: ${authenticatedUser.id} tried to modify ${user_id}`);
+            return NextResponse.json(
+                { error: 'You can only modify your own subscription' },
+                { status: 403, headers: corsHeaders }
             );
         }
 

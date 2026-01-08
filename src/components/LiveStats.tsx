@@ -24,16 +24,20 @@ function getTodayBaseSales() {
     return baseSales + hourlyProgress;
 }
 
-function getActiveUsers() {
+// Get active users - moved to useEffect to prevent hydration mismatch
+function getActiveUsersCount() {
     const hour = new Date().getHours();
+    const seed = hour * 1000 + new Date().getMinutes();
+    const seededRandom = Math.abs(Math.sin(seed)) % 1;
     // Peak hours: 10-12 and 19-22
-    if (hour >= 10 && hour <= 12) return Math.floor(Math.random() * 20) + 45;
-    if (hour >= 19 && hour <= 22) return Math.floor(Math.random() * 25) + 50;
-    if (hour >= 2 && hour <= 7) return Math.floor(Math.random() * 10) + 15; // Night
-    return Math.floor(Math.random() * 15) + 30; // Normal
+    if (hour >= 10 && hour <= 12) return Math.floor(seededRandom * 20) + 45;
+    if (hour >= 19 && hour <= 22) return Math.floor(seededRandom * 25) + 50;
+    if (hour >= 2 && hour <= 7) return Math.floor(seededRandom * 10) + 15; // Night
+    return Math.floor(seededRandom * 15) + 30; // Normal
 }
 
 export default function LiveStats() {
+    // Use consistent initial values to prevent hydration mismatch
     const [activeUsers, setActiveUsers] = useState(35);
     const [todaySales, setTodaySales] = useState(100);
     const [isClient, setIsClient] = useState(false);
@@ -41,8 +45,8 @@ export default function LiveStats() {
     useEffect(() => {
         setIsClient(true);
 
-        // Set initial values
-        setActiveUsers(getActiveUsers());
+        // Set initial values only on client
+        setActiveUsers(getActiveUsersCount());
         setTodaySales(getTodayBaseSales());
 
         // Update active users every 5 seconds with small variations
@@ -54,13 +58,13 @@ export default function LiveStats() {
             });
         }, 5000);
 
-        // Update sales every 30-90 seconds (realistic purchasing pace)
+        // Use fixed interval instead of random to prevent issues
         const salesInterval = setInterval(() => {
             const shouldIncrease = Math.random() > 0.3; // 70% chance of increase
             if (shouldIncrease) {
                 setTodaySales(prev => prev + 1);
             }
-        }, Math.random() * 60000 + 30000); // 30-90 seconds
+        }, 45000); // Fixed 45 seconds instead of random
 
         return () => {
             clearInterval(userInterval);

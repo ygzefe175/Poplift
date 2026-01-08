@@ -25,13 +25,13 @@ export default function Pricing() {
         },
         {
             name: "Pro",
-            price: "₺399",
+            price: "₺599",
             period: "/ay",
             description: "Büyüyen e-ticaret siteleri",
             features: [
                 "25.000 görüntüleme/ay",
                 "Sınırsız kampanya",
-                "Tüm şablonlar + özel tasarım",
+                "Tüm şablonlar dahil",
                 // Güncelleme: Gamification ve Auto Email eklendi
                 "🎡 Gamification (Çarkıfelek)",
                 "📧 Otomatik E-Posta (Auto-Responder)",
@@ -57,7 +57,6 @@ export default function Pricing() {
                 "📧 Otomatik E-Posta",
                 "📊 Gelişmiş ROI ve Kâr Analizi",
                 "WhatsApp destek (7/24)",
-                "Özel onboarding",
                 "Dedicated hesap yöneticisi",
                 "Multi-domain desteği"
             ],
@@ -79,6 +78,18 @@ export default function Pricing() {
                     <p className="text-slate-400 max-w-2xl mx-auto">
                         Ücretsiz başla, büyüdükçe upgrade et. Kredi kartı bilgisi istemiyoruz.
                     </p>
+
+                    {/* Student Banner */}
+                    <Link
+                        href="/ogrenci"
+                        className="inline-flex items-center gap-3 mt-6 px-6 py-3 bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-full hover:border-purple-500/50 transition-all group"
+                    >
+                        <span className="text-2xl">🎓</span>
+                        <span className="text-sm text-purple-300">
+                            <span className="font-bold text-white">Öğrenci misin?</span> Pro paket sadece <span className="text-pink-400 font-bold">₺399/ay</span> (Normal: ₺599)
+                        </span>
+                        <span className="text-purple-400 group-hover:translate-x-1 transition-transform">→</span>
+                    </Link>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -152,18 +163,8 @@ export default function Pricing() {
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
                         {[
-                            {
-                                id: "tasarim",
-                                icon: <Palette size={24} className="text-purple-400" />,
-                                name: "Özel Tasarım Paketi",
-                                price: "₺499",
-                                type: "tek seferlik",
-                                typeLabel: "TEK SEFERLİK ÖDEME",
-                                isOneTime: true,
-                                desc: "Marka kimliğinize özel 5 kampanya tasarımı."
-                            },
                             {
                                 id: "analytics",
                                 icon: <BarChart3 size={24} className="text-emerald-400" />,
@@ -173,16 +174,6 @@ export default function Pricing() {
                                 typeLabel: "AYLIK ABONELİK",
                                 isOneTime: false,
                                 desc: "Detaylı raporlar, funnel analizi, cohort takibi."
-                            },
-                            {
-                                id: "onboarding",
-                                icon: <Users size={24} className="text-blue-400" />,
-                                name: "Özel Onboarding",
-                                price: "₺299",
-                                type: "tek seferlik",
-                                typeLabel: "TEK SEFERLİK ÖDEME",
-                                isOneTime: true,
-                                desc: "1 saatlik zoom call + ilk kampanyaları kuruyoruz."
                             },
                             {
                                 id: "ai",
