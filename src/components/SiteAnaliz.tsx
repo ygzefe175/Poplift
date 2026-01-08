@@ -176,8 +176,8 @@ export default function SiteAnaliz() {
     };
 
     /**
-     * Site analizi yap (simüle edilmiş - gerçek uygulamada API çağrısı yapılmalı)
-     * URL validasyonu ve hata yönetimi ile iyileştirildi
+     * Site analizi yap - GERÇEK API çağrısı ile
+     * URL validasyonu ve hata yönetimi ile
      */
     const analyzeSite = async () => {
         if (!url.trim()) {
@@ -192,7 +192,7 @@ export default function SiteAnaliz() {
             if (!formattedUrl.startsWith('http://') && !formattedUrl.startsWith('https://')) {
                 formattedUrl = 'https://' + formattedUrl;
             }
-            
+
             // URL validasyonu
             new URL(formattedUrl);
         } catch (e) {
@@ -203,20 +203,86 @@ export default function SiteAnaliz() {
         setIsAnalyzing(true);
 
         try {
-            // Simüle edilmiş analiz (gerçek uygulamada burada SEO API çağrısı yapılmalı)
-            // Daha gerçekçi simülasyon için 2-3 saniye bekliyoruz
-            await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 1000));
+            // GERÇEK API çağrısı
+            const response = await fetch('/api/site-analyze', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ url: formattedUrl })
+            });
 
-            const newAnalysis = generateRealisticAnalysis(formattedUrl);
+            const result = await response.json();
+
+            if (!result.success) {
+                toast.error(result.error || (language === 'tr' ? 'Analiz başarısız oldu' : 'Analysis failed'));
+                setIsAnalyzing(false);
+                return;
+            }
+
+            // API yanıtını SiteAnalysis formatına dönüştür
+            const apiData = result.data;
+            const newAnalysis: SiteAnalysis = {
+                url: apiData.url,
+                seoScore: apiData.seoScore,
+                speedScore: apiData.speedScore,
+                mobileScore: apiData.mobileScore,
+                securityScore: apiData.securityScore,
+                overallScore: apiData.overallScore,
+                metaTags: {
+                    title: apiData.metaTags.title,
+                    description: apiData.metaTags.description,
+                    keywords: apiData.metaTags.keywords || [],
+                    ogImage: apiData.metaTags.ogImage,
+                    ogTitle: apiData.metaTags.ogTitle,
+                    ogDescription: apiData.metaTags.ogDescription,
+                    twitterCard: apiData.metaTags.twitterCard,
+                    canonical: !!apiData.metaTags.canonical
+                },
+                performance: {
+                    loadTime: (apiData.performance.responseTime / 1000).toFixed(1) + 's',
+                    totalSize: Math.round(apiData.performance.htmlSize / 1024) + ' KB',
+                    requests: apiData.links ? (apiData.links.internal + apiData.links.external) : 0,
+                    imagesOptimized: apiData.images ? (apiData.images.withAlt === apiData.images.total) : true,
+                    cssOptimized: apiData.performance.compression,
+                    jsOptimized: apiData.performance.compression
+                },
+                seoIssues: {
+                    missingTitle: !apiData.metaTags.title,
+                    missingDescription: !apiData.metaTags.description,
+                    titleTooLong: apiData.metaTags.titleLength > 60,
+                    descriptionTooLong: apiData.metaTags.descriptionLength > 160,
+                    noH1Tags: apiData.headings.h1Count === 0,
+                    missingAltTags: apiData.images?.withoutAlt || 0
+                },
+                mobileIssues: {
+                    viewportMissing: !apiData.metaTags.viewport,
+                    touchFriendly: apiData.mobileScore > 70,
+                    fontSizeReadable: apiData.mobileScore > 60,
+                    buttonSize: apiData.mobileScore > 70
+                },
+                security: {
+                    sslEnabled: apiData.security.sslEnabled,
+                    httpSecure: apiData.security.httpSecure,
+                    mixedContent: apiData.security.mixedContent,
+                    securityHeaders: Object.values(apiData.security.securityHeaders || {}).filter(Boolean).length
+                },
+                backlinks: 0, // Gerçek backlink için ayrı API gerekir
+                domainAge: language === 'tr' ? 'Bilinmiyor' : 'Unknown',
+                issues: apiData.issues || [],
+                recommendations: apiData.recommendations || [],
+                analyzedAt: apiData.analyzedAt
+            };
+
             setAnalysis(newAnalysis);
-            
+
             // localStorage'a kaydet
             const updated = [newAnalysis, ...recentAnalyses.slice(0, 9)];
             setRecentAnalyses(updated);
             localStorage.setItem('site_analyses', JSON.stringify(updated));
-            
+
             setIsAnalyzing(false);
-            toast.success(language === 'tr' ? 'Analiz tamamlandı! 🎉' : 'Analysis completed! 🎉');
+            toast.success(language === 'tr' ? '✅ Gerçek analiz tamamlandı!' : '✅ Real analysis completed!');
         } catch (error) {
             setIsAnalyzing(false);
             toast.error(language === 'tr' ? 'Analiz sırasında bir hata oluştu' : 'An error occurred during analysis');
@@ -232,45 +298,45 @@ export default function SiteAnaliz() {
         try {
             const urlObj = new URL(siteUrl);
             const hostname = urlObj.hostname;
-            
+
             // Domain yaşına göre skorlar (daha eski domainler genelde daha iyi)
             const isNewDomain = hostname.includes('localhost') || hostname.includes('127.0.0.1') || hostname.includes('test');
             const domainAgeYears = isNewDomain ? Math.random() * 2 : Math.random() * 15 + 1;
-            
+
             // Gerçekçi skorlar - birbirleriyle ilişkili
             // SEO skoru: meta tag'ler, içerik, yapı vb.
             const baseSEO = isNewDomain ? 40 : 60;
             const seoScore = Math.max(30, Math.min(95, baseSEO + (Math.random() * 30) - 5));
-            
+
             // Hız skoru: genelde SEO'ya bağlı ama farklı olabilir
             const baseSpeed = seoScore - 10 + (Math.random() * 20);
             const speedScore = Math.max(25, Math.min(95, baseSpeed));
-            
+
             // Mobil skoru: modern sitelerde genelde yüksek
             const mobileScore = Math.max(60, Math.min(95, 75 + (Math.random() * 20)));
-            
+
             // Güvenlik skoru: SSL ve güvenlik başlıkları
             const hasSSL = siteUrl.startsWith('https://');
             const securityScore = hasSSL ? Math.max(70, Math.min(95, 85 + (Math.random() * 10))) : Math.max(20, Math.min(60, 40 + (Math.random() * 20)));
-            
+
             // Genel puan: tüm skorların ağırlıklı ortalaması
             const overallScore = Math.round(
-                (seoScore * 0.30) + 
-                (speedScore * 0.25) + 
-                (mobileScore * 0.20) + 
+                (seoScore * 0.30) +
+                (speedScore * 0.25) +
+                (mobileScore * 0.20) +
                 (securityScore * 0.25)
             );
 
             // Meta tag analizi - gerçekçi senaryolar
             const hasTitle = Math.random() > 0.15;
             const hasDescription = Math.random() > 0.20;
-            const titleText = hasTitle 
+            const titleText = hasTitle
                 ? `${hostname.charAt(0).toUpperCase() + hostname.slice(1).replace('.com', '').replace('.net', '').replace('.org', '')} - ${language === 'tr' ? 'Ana Sayfa' : 'Home'}`
                 : null;
             const descriptionText = hasDescription
                 ? `${language === 'tr' ? 'Web sitemize hoş geldiniz. En iyi' : 'Welcome to our website. Best'} ${hostname.includes('shop') || hostname.includes('store') ? (language === 'tr' ? 'ürünler' : 'products') : (language === 'tr' ? 'hizmetler' : 'services')}.`
                 : null;
-            
+
             const titleLength = titleText ? titleText.length : 0;
             const descriptionLength = descriptionText ? descriptionText.length : 0;
 
@@ -572,8 +638,8 @@ export default function SiteAnaliz() {
                     </h2>
                     <div className="space-y-3 text-slate-300 leading-relaxed">
                         <p>
-                            <strong className="text-white">Site Analiz Aracı</strong>, web sitenizin SEO performansını, 
-                            yükleme hızını, mobil uyumluluğunu ve güvenlik durumunu analiz eder. 
+                            <strong className="text-white">Site Analiz Aracı</strong>, web sitenizin SEO performansını,
+                            yükleme hızını, mobil uyumluluğunu ve güvenlik durumunu analiz eder.
                             Ücretsiz ve anında sonuç alın!
                         </p>
                         <div className="grid md:grid-cols-2 gap-4 mt-4">
@@ -683,11 +749,11 @@ export default function SiteAnaliz() {
                                 />
                             </div>
                             <p className={`text-sm ${theme === 'dark' ? 'text-slate-400' : 'text-gray-600'} mt-2`}>
-                                {analysis.overallScore >= 80 
+                                {analysis.overallScore >= 80
                                     ? (language === 'tr' ? 'Mükemmel! Siteniz çok iyi durumda.' : 'Excellent! Your site is in great condition.')
                                     : analysis.overallScore >= 60
-                                    ? (language === 'tr' ? 'İyi! Bazı iyileştirmeler yapılabilir.' : 'Good! Some improvements can be made.')
-                                    : (language === 'tr' ? 'İyileştirme gerekli. Aşağıdaki önerilere bakın.' : 'Improvement needed. Check the recommendations below.')
+                                        ? (language === 'tr' ? 'İyi! Bazı iyileştirmeler yapılabilir.' : 'Good! Some improvements can be made.')
+                                        : (language === 'tr' ? 'İyileştirme gerekli. Aşağıdaki önerilere bakın.' : 'Improvement needed. Check the recommendations below.')
                                 }
                             </p>
                         </div>
@@ -733,8 +799,8 @@ export default function SiteAnaliz() {
                                 </h3>
                                 <div className="space-y-3">
                                     {analysis.recommendations.slice(0, 5).map((rec, idx) => (
-                                        <div 
-                                            key={idx} 
+                                        <div
+                                            key={idx}
                                             className={`flex items-start gap-3 p-4 rounded-xl ${theme === 'dark' ? 'bg-white/5 border border-white/10' : 'bg-white border border-gray-200'}`}
                                         >
                                             <div className={`w-8 h-8 rounded-full flex items-center justify-center font-black text-sm ${idx === 0 ? 'bg-red-500 text-white' : idx === 1 ? 'bg-orange-500 text-white' : idx === 2 ? 'bg-yellow-500 text-black' : 'bg-blue-500 text-white'} flex-shrink-0`}>
@@ -988,15 +1054,14 @@ export default function SiteAnaliz() {
                             </button>
                             <button
                                 onClick={exportPDF}
-                                className={`flex-1 btn-secondary inline-flex items-center justify-center gap-2 relative ${
-                                    isPremium
-                                        ? theme === 'dark' 
-                                            ? 'border-cyan-400/20 hover:bg-cyan-400/10' 
+                                className={`flex-1 btn-secondary inline-flex items-center justify-center gap-2 relative ${isPremium
+                                        ? theme === 'dark'
+                                            ? 'border-cyan-400/20 hover:bg-cyan-400/10'
                                             : 'border-cyan-400/30 hover:bg-cyan-50'
                                         : theme === 'dark'
                                             ? 'border-white/5 cursor-not-allowed group'
                                             : 'border-gray-300 cursor-not-allowed group'
-                                } transition-all`}
+                                    } transition-all`}
                                 disabled={!isPremium}
                             >
                                 {isPremium ? (

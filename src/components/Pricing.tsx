@@ -163,8 +163,20 @@ export default function Pricing() {
                         </p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
                         {[
+                            {
+                                id: "site-analiz",
+                                icon: <BarChart3 size={24} className="text-cyan-400" />,
+                                name: "Site Analiz Pro",
+                                price: "₺199",
+                                type: "/ay",
+                                typeLabel: "AYLIK ABONELİK",
+                                isOneTime: false,
+                                desc: "Gerçek SEO analizi, performans testi, güvenlik kontrolü. Sınırsız site analizi.",
+                                badge: "🔥 YENİ",
+                                badgeColor: "bg-cyan-500/20 text-cyan-400 border-cyan-500/30"
+                            },
                             {
                                 id: "analytics",
                                 icon: <BarChart3 size={24} className="text-emerald-400" />,
@@ -188,8 +200,13 @@ export default function Pricing() {
                         ].map((addon) => (
                             <div
                                 key={addon.id}
-                                className="bg-white/5 border border-white/10 rounded-2xl p-6 hover:border-brand-orange/30 transition-all flex flex-col"
+                                className={`bg-white/5 border ${addon.badge ? 'border-cyan-500/30' : 'border-white/10'} rounded-2xl p-6 hover:border-brand-orange/30 transition-all flex flex-col relative`}
                             >
+                                {addon.badge && (
+                                    <div className={`absolute -top-3 right-4 px-3 py-1 rounded-full text-xs font-bold ${addon.badgeColor}`}>
+                                        {addon.badge}
+                                    </div>
+                                )}
                                 <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center mb-4">
                                     {addon.icon}
                                 </div>
@@ -211,11 +228,11 @@ export default function Pricing() {
                                 <p className="text-sm text-slate-400 leading-relaxed flex-grow">{addon.desc}</p>
 
                                 <Link
-                                    href={`/register?addon=${addon.id}&price=${encodeURIComponent(addon.price)}&type=${addon.isOneTime ? 'onetime' : 'monthly'}`}
+                                    href={addon.id === 'site-analiz' ? '/site-analiz' : `/register?addon=${addon.id}&price=${encodeURIComponent(addon.price)}&type=${addon.isOneTime ? 'onetime' : 'monthly'}`}
                                     className="mt-4 w-full py-2.5 px-4 bg-white/10 hover:bg-brand-orange hover:text-black border border-white/20 hover:border-brand-orange rounded-xl text-center text-sm font-bold text-white transition-all flex items-center justify-center gap-2"
                                 >
                                     <ShoppingCart size={16} />
-                                    Satın Al
+                                    {addon.id === 'site-analiz' ? 'Şimdi Dene' : 'Satın Al'}
                                 </Link>
                             </div>
                         ))}
